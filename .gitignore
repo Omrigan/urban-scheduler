@@ -1,0 +1,8 @@
+.idea
+__pycache__
+data/
+osrm/
+deploy/dev/.env
+deploy/prod/.env
+.ipynb_checkpoints/
+token.json
