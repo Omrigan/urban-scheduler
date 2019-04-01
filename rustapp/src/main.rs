@@ -16,10 +16,10 @@ fn index() -> &'static str {
 }
 
 fn main() {
-    let p = logic::get_sample_problem();
-    println!("{:?}", p);
-
-    let s = logic::solve_stupid(&p);
+//    let p = logic::get_sample_problem();
+//    println!("{:?}", p);
+//
+//    let s = logic::solve_stupid(&p);
 
 //    rocket::ignite().mount("/", routes![index]).launch();
 }

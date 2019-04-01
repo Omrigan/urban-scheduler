@@ -6,6 +6,8 @@ use nalgebra::{Matrix, DMatrix};
 use nalgebra::base::{Scalar, Dim};
 use nalgebra::storage::Storage;
 use nalgebra::base::Vector;
+use rand::{thread_rng, seq};
+
 
 #[derive(Debug)]
 pub struct Problem {
@@ -146,10 +148,25 @@ fn squash_distances(first: DistanceMatrix, second: DistanceMatrix) -> (DistanceM
 //            dists[i, j] = vector[answers[i, j]]
 //    return dists, answers
 
+fn sample_any(event: &Event) -> &MyPoint {
+    let mut rng = thread_rng();
+    seq::sample_iter(&mut rng, event.points.iter(), 1).unwrap()[0]
+}
+
 pub fn solve_ordered(p: &Problem) -> Solution {
     let mut result = Solution {
         schedule: Vec::with_capacity(p.ordered_events.len())
     };
+    if p.ordered_events.len() == 0 {
+        return result;
+    }
+    if p.ordered_events.len() == 1 {
+        result.schedule.push(sample_any(&p.ordered_events[0]));
+        return result;
+    }
+
+
+
     let mut answers = Vec::<AnswersMatrix>::new();
     let mut current_dists: Option<DistanceMatrix> = None;
 
@@ -205,16 +222,45 @@ pub fn solve_stupid(p: &Problem) -> Solution {
     result
 }
 
-pub fn get_sample_problem() -> Problem {
-    let sample_point = MyPoint {
-        idx: 0,
-        point: Point::from((1f64, 2f64)),
-    };
-    let sample_event = Event {
-        idx: 0,
-        points: vec![sample_point],
-    };
-    Problem {
-        ordered_events: vec![sample_event]
+
+#[cfg(test)]
+mod tests {
+    // Note this useful idiom: importing names from outer (for mod tests) scope.
+    use super::*;
+
+    fn get_sample_problem() -> Problem {
+        let sample_point = MyPoint {
+            idx: 0,
+            point: Point::from((1f64, 2f64)),
+        };
+        let sample_event = Event {
+            idx: 0,
+            points: vec![sample_point],
+        };
+        Problem {
+            ordered_events: vec![sample_event]
+        }
+    }
+
+
+    #[test]
+    fn test_sample_problem() {
+        let p = get_sample_problem();
+        assert_eq!(p.ordered_events.len(), 1);
+    }
+
+    #[test]
+    fn test_stupid_solution() {
+        let p = get_sample_problem();
+        let s = solve_stupid(&p);
+        assert_eq!(s.schedule.len(), p.ordered_events.len());
+    }
+
+
+    #[test]
+    fn test_ordered_solution() {
+        let p = get_sample_problem();
+        let s = solve_ordered(&p);
+        assert_eq!(s.schedule.len(), p.ordered_events.len());
     }
 }
