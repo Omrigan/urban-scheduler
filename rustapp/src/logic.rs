@@ -1,21 +1,59 @@
 use geo::Point;
 use geo::prelude::*;
-use std::fmt::Display;
-use std::fmt;
 use nalgebra::{Matrix, DMatrix};
 use nalgebra::base::{Scalar, Dim};
 use nalgebra::storage::Storage;
 use nalgebra::base::Vector;
 use rand::{thread_rng, seq};
+use serde::{Serialize, Deserialize};
 
-
-#[derive(Debug)]
-pub struct Problem {
-    ordered_events: Vec<Event>
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum DistsMethod {
+    Dummy,
+    OSRM,
 }
 
-pub struct Solution<'a> {
-    schedule: Vec<&'a MyPoint>
+
+impl Default for DistsMethod {
+    fn default() -> Self {
+        DistsMethod::Dummy
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum SolveAlgorithm {
+    Stupid,
+    Ordered,
+}
+
+
+impl Default for SolveAlgorithm {
+    fn default() -> Self {
+        SolveAlgorithm::Ordered
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Default)]
+struct Config {
+    dists_method: DistsMethod,
+    solve_algorithm: SolveAlgorithm
+}
+
+
+
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Problem {
+    ordered_events: Vec<Event>,
+    #[serde(default)]
+    config: Config,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Solution {
+    schedule: Vec<MyPoint>
 }
 
 //impl Display for Solution {
@@ -24,16 +62,23 @@ pub struct Solution<'a> {
 //    }
 //}
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Event {
     idx: u64,
     points: Vec<MyPoint>,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MyPoint {
-    point: Point<f64>,
+    coords: (f64, f64),
     idx: u64,
+
+}
+
+impl MyPoint {
+    fn get_point(&self) -> Point<f64> {
+        Point::from(self.coords)
+    }
 }
 
 struct Path<'a> {
@@ -106,7 +151,7 @@ fn insert_after(old_path: &mut Path, new_segment: Path) {}
 
 
 fn calculate_distance(p1: &MyPoint, p2: &MyPoint) -> Distance {
-    return p1.point.vincenty_distance(&p2.point).unwrap();
+    return p1.get_point().vincenty_distance(&p2.get_point()).unwrap();
 }
 
 
@@ -114,7 +159,7 @@ fn calculate_distance_matrix<'a>(from: &'a Vec<MyPoint>, to: &'a Vec<MyPoint>) -
     let mut result = DistanceMatrix::zeros(from.len(), to.len());
     for (i, x) in from.iter().enumerate() {
         for (j, y) in to.iter().enumerate() {
-            *result.index_mut((0, 0)) = calculate_distance(x, y);
+            *result.index_mut((i, j)) = calculate_distance(x, y);
         }
     }
     result
@@ -161,10 +206,9 @@ pub fn solve_ordered(p: &Problem) -> Solution {
         return result;
     }
     if p.ordered_events.len() == 1 {
-        result.schedule.push(sample_any(&p.ordered_events[0]));
+        result.schedule.push(sample_any(&p.ordered_events[0]).clone());
         return result;
     }
-
 
 
     let mut answers = Vec::<AnswersMatrix>::new();
@@ -205,7 +249,7 @@ pub fn solve_ordered(p: &Problem) -> Solution {
     reverted_schedule_idxs.push(start);
 
     for (idx, schedule_item) in reverted_schedule_idxs.iter().rev().enumerate() {
-        result.schedule.push(&p.ordered_events[idx].points[*schedule_item]);
+        result.schedule.push(p.ordered_events[idx].points[*schedule_item].clone());
     }
 
     result
@@ -217,7 +261,7 @@ pub fn solve_stupid(p: &Problem) -> Solution {
         schedule: Vec::with_capacity(p.ordered_events.len())
     };
     for event in p.ordered_events.iter() {
-        result.schedule.push(&event.points[0]);
+        result.schedule.push(event.points[0].clone());
     }
     result
 }
@@ -231,14 +275,16 @@ mod tests {
     fn get_sample_problem() -> Problem {
         let sample_point = MyPoint {
             idx: 0,
-            point: Point::from((1f64, 2f64)),
+            coords: (1f64, 2f64),
         };
         let sample_event = Event {
             idx: 0,
             points: vec![sample_point],
         };
         Problem {
-            ordered_events: vec![sample_event]
+            ordered_events: vec![sample_event],
+            config: Config::default()
+
         }
     }
 
@@ -262,5 +308,14 @@ mod tests {
         let p = get_sample_problem();
         let s = solve_ordered(&p);
         assert_eq!(s.schedule.len(), p.ordered_events.len());
+    }
+
+    #[test]
+    fn test_serialize() {
+        let p = get_sample_problem();
+        let serialized = serde_json::to_string(&p).unwrap();
+        println!("serialized = {}", serialized);
+        assert_eq!(serialized, r#"{"ordered_events":[{"idx":0,"points":[{"coords":[1.0,2.0],"idx":0}]}]}"#);
+//        assert_eq!(s.schedule.len(), p.ordered_events.len());
     }
 }

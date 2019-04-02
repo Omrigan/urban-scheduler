@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 rocket = "0.4.0"
+rocket_contrib = "0.4.0"
 geo = "0.12.0"
 nalgebra = "0.17"
 rand = "0.6.5"

@@ -1,25 +1,52 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
-#[macro_use] extern crate rocket;
+#[macro_use]
+extern crate rocket;
 
-use crate::logic::Problem;
-use crate::logic::MyPoint;
-use geo::Point;
-use geo::Coordinate;
-use crate::logic::Event;
+use rocket_contrib::json::{Json, JsonValue};
+use rocket::Rocket;
+
+use crate::logic::{Problem, Solution, solve_ordered};
 
 mod logic;
 
-#[get("/")]
-fn index() -> &'static str {
-    "Hello, world!"
+#[post("/predict_raw", format = "json", data = "<problem_raw>")]
+fn predict_raw(problem_raw: Json<Problem>) -> Json<Solution> {
+    let problem = problem_raw;
+    let solution = solve_ordered(&problem);
+    Json(solution)
+}
+
+fn rocket() -> Rocket {
+    rocket::ignite().mount("/", routes![predict_raw])
 }
 
 fn main() {
-//    let p = logic::get_sample_problem();
-//    println!("{:?}", p);
-//
-//    let s = logic::solve_stupid(&p);
+    rocket().launch();
+}
 
-//    rocket::ignite().mount("/", routes![index]).launch();
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use rocket;
+    use rocket::local::Client;
+    use rocket::http::{Status, ContentType};
+
+
+    #[test]
+    fn test_predict_raw() {
+        let client = Client::new(rocket()).unwrap();
+
+        // Try to get a message with an ID that doesn't exist.
+        let mut response = client.post("/predict_raw")
+            .header(ContentType::JSON)
+            .body(r#"{"ordered_events":[{"idx":0,"points":[{"coords":[1.0,2.0],"idx":0}]}]}"#)
+            .dispatch();
+
+        assert_eq!(response.status(), Status::Ok);
+        let response_text = response.body().unwrap().into_string().unwrap();
+        println!("{:?}", response_text);
+//        assert_eq!(response_text, r#"{\"schedule\":[{\"coords\":[1.0,2.0],\"idx\":0}]}"#);
+    }
 }
