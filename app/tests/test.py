@@ -74,7 +74,7 @@ class TC(TestCase):
 
     def test_params(self):
         resp = get("http://127.0.0.1:80/get_params")
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200, resp.json())
         # print(resp.json())
 
     def test_error(self):
