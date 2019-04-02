@@ -13,6 +13,13 @@ import random
 import osm_connector
 import json
 import datetime
+import requests
+
+RUST_URL = os.getenv('RUST_URL', "http://rustapp:80/predict_raw")
+
+
+def to_rust_coords(python_location):
+    return float(python_location['lat']), float(python_location['lng'])
 
 
 def normalize_config(config):
@@ -22,7 +29,7 @@ def normalize_config(config):
 
     result['dists_method'] = config.get('routingBackend') or 'dummy'
     result["clipping"] = int(config.get('clipping') or 50)
-
+    result["solver"] = config.get("solver") or "python"
     return result
 
 
@@ -102,7 +109,13 @@ class Predictor:
         candidates = [self.get_candidates(event) for event in ordered_events]
         self.numbers_of_candidates = [len(item) for item in candidates]
         self.checkpoint("candidates_retrieved")
-        ordered_solution = self._solve_ordered(candidates)
+        if self.config['solver'] == "python":
+            ordered_solution = self._solve_ordered(candidates)
+        elif self.config['solver'] == "rust":
+            ordered_solution = self._solve_ordered_rust(candidates)
+        else:
+            raise NotImplementedError
+
         self.checkpoint("ordered_solved")
         ordered_prediction = self.decode_ordered_ids(ordered_events, ordered_solution)
         self.checkpoint("finished")
@@ -118,36 +131,34 @@ class Predictor:
                 result.append(places.find_one({'_id': id}, {'_id': 0}))
         return result
 
-    def _solve_ordered(self, all_candidates):
-        answers = []  # 2..n
-        current_dists = None
+    def _solve_ordered_rust(self, all_candidates):
+        events_int_to_mongo = []
+        rust_events = []
+        for event_idx, event in enumerate(all_candidates):
+            this_dct = {}
+            this_event = {
+                "idx": event_idx,
+                "points": []
+            }
+            for i, point in enumerate(event):
+                this_dct[i] = point["_id"]
+                this_event["points"].append({
+                    "coords": to_rust_coords(point['location']),
+                    "idx": i
+                })
+            events_int_to_mongo.append(this_dct)
+            rust_events.append(this_event)
 
-        for i in range(1, len(all_candidates)):
-            last_dists = self.calculate_distances(all_candidates[i - 1], all_candidates[i])
+        self.checkpoint("rust_data_prepared")
+        result = requests.post(RUST_URL, json={"ordered_events": rust_events}).json()
+        self.checkpoint("rust_completed")
+        answer = []
+        for dct, point in zip(events_int_to_mongo, result['schedule']):
+            answer.append(dct[point['idx']])
+        print(answer)
+        return answer
 
-            if current_dists is not None:
-                current_dists, answer = squash_distances(current_dists, last_dists)
-                answers.append(answer)
-            else:
-                current_dists = last_dists
 
-        def myargmin(x):
-            return np.unravel_index(np.argmin(x, axis=None), x.shape)
-
-        self.checkpoint("ordered_forward_pass")
-
-        start, end = myargmin(current_dists)
-        revered_result_route = [end]
-        current_point = end
-        for i in reversed(range(0, len(answers))):
-            current_answers = answers[i]
-            next_point = current_answers[start, current_point]
-            revered_result_route.append(next_point)
-            current_point = next_point
-        result_route = [start] + list(reversed(revered_result_route))
-
-        idx_sequence = [all_candidates[i][point]['_id'] for i, point in enumerate(result_route)]
-        return idx_sequence
     def _solve_ordered(self, all_candidates):
         answers = []  # 2..n
         current_dists = None

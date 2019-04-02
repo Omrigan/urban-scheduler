@@ -1,6 +1,6 @@
 use geo::Point;
 use geo::prelude::*;
-use nalgebra::{Matrix, DMatrix};
+use nalgebra::{Matrix, DMatrix, DVector, RowDVector};
 use nalgebra::base::{Scalar, Dim};
 use nalgebra::storage::Storage;
 use nalgebra::base::Vector;
@@ -38,10 +38,8 @@ impl Default for SolveAlgorithm {
 #[derive(Debug, Serialize, Deserialize, Default)]
 struct Config {
     dists_method: DistsMethod,
-    solve_algorithm: SolveAlgorithm
+    solve_algorithm: SolveAlgorithm,
 }
-
-
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -171,10 +169,12 @@ fn squash_distances(first: DistanceMatrix, second: DistanceMatrix) -> (DistanceM
     let mut result_answers = AnswersMatrix::zeros(result_shape.0, result_shape.1);
     for i in 0..result_shape.0 {
         for j in 0..result_shape.1 {
-            let dists = first.row(i) + second.column(j);
-            let argmin = dists.argmin();
-            *result_answers.index_mut((i, j)) = argmin.0;
-            *result_dists.index_mut((i, j)) = argmin.1;
+            println!("{} {}", first.row(i).nrows(), first.row(i).ncols());
+            println!("{} {}", second.transpose().row(j).nrows(), second.transpose().row(j).ncols());
+            let dists: RowDVector<f64> = first.row(i) + second.transpose().row(j);
+            let argmin = dists.matrix_argmin();
+            *result_answers.index_mut((i, j)) = argmin.1;
+            *result_dists.index_mut((i, j)) = dists.index(argmin).clone();
         }
     }
 
@@ -283,8 +283,7 @@ mod tests {
         };
         Problem {
             ordered_events: vec![sample_event],
-            config: Config::default()
-
+            config: Config::default(),
         }
     }
 

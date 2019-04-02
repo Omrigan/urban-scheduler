@@ -30,7 +30,9 @@ services: {
     container_name: rustapp,
     image: rustapp,
     build: ../../rustapp,
-    ports: ["90:8000"]
+    ports: ["90:8000"],
+    volumes: ["../../rustapp:/rustapp"],
+    command: /rustapp/restart-on-filechange.sh
   }
 
 }

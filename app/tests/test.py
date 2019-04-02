@@ -40,6 +40,7 @@ sample_ordered = [
 def request(endpoint, data):
     return post("http://127.0.0.1:80" + endpoint, json=data).json()
 
+
 class TC(TestCase):
     def _assert_exception(self, resp, exception):
         self.assertEqual(resp.get('error_code'), exception.code, resp)
@@ -85,3 +86,12 @@ class TC(TestCase):
         }
         resp = request('/predict', sample)
         self._assert_exception(resp, InvalidEvent)
+
+    def test_rust(self):
+        p = Predictor({"solver": "rust"})
+        prediction_rust = p.predict_ordered(sample_ordered)
+        print(p.report())
+        p = Predictor({"solver": "python"})
+        prediction_python = p.predict_ordered(sample_ordered)
+        print(p.report())
+        self.assertListEqual(prediction_python, prediction_rust)

@@ -7,6 +7,7 @@ use rocket_contrib::json::{Json, JsonValue};
 use rocket::Rocket;
 
 use crate::logic::{Problem, Solution, solve_ordered};
+use rocket::config::{Config, Environment};
 
 mod logic;
 
@@ -17,13 +18,20 @@ fn predict_raw(problem_raw: Json<Problem>) -> Json<Solution> {
     Json(solution)
 }
 
+
 fn rocket() -> Rocket {
-    rocket::ignite().mount("/", routes![predict_raw])
+    let config = Config::build(Environment::Staging)
+    .address("0.0.0.0")
+    .port(80)
+    .finalize().unwrap();
+
+    rocket::custom(config).mount("/", routes![predict_raw])
 }
 
 fn main() {
     rocket().launch();
 }
+
 
 #[cfg(test)]
 mod tests {
