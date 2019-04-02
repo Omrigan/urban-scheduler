@@ -25,7 +25,14 @@ services: {
     ],
     command: /start-dev.sh,
     ports: ["89:80"]
+  },
+  rustapp: {
+    container_name: rustapp,
+    image: rustapp,
+    build: ../../rustapp,
+    ports: ["90:8000"]
   }
+
 }
 
 
