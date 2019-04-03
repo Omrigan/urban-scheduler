@@ -30,11 +30,18 @@ services: {
     container_name: rustapp,
     image: rustapp,
     build: ../../rustapp,
-    ports: ["90:8000"],
+    ports: ["90:80"],
     volumes: ["../../rustapp:/rustapp"],
     command: /rustapp/restart-on-filechange.sh
-  }
-
+  },
+  front: {
+    container_name: front,
+    image: front,
+    build: ../../front,
+    ports: ["80:80"],
+    volumes: ["../../front:/front"],
+    command: npm start
+  },
 }
 
 
