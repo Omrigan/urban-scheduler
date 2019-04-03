@@ -1,8 +1,6 @@
 import React, {Component} from 'react';
 import {Input, Dropdown} from 'semantic-ui-react'
-import {OptionsContext} from '../lib/api'
 import '../App.css'
-import CoordinatesSelector from './CoordinatesSelector'
 
 
 const routingBackends = [

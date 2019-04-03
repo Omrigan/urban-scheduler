@@ -1,11 +1,8 @@
 // @flow
 
-import React, {Component, Fragment} from 'react'
-import {Map, TileLayer, Marker, Popup} from 'react-leaflet'
+import React, {Component} from 'react'
 import L from 'leaflet';
-import {Message, Accordion, Icon} from "semantic-ui-react";
-import {Event} from "./Event";
-import {OptionsContext} from "../lib/api";
+import {Message} from "semantic-ui-react";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -16,27 +13,6 @@ L.Icon.Default.mergeOptions({
     iconUrl: require('leaflet/dist/images/marker-icon.png'),
     shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 });
-
-const MyPopupMarker = ({content, position}) => (
-    <Marker position={position}>
-        <Popup>{content}</Popup>
-    </Marker>
-);
-
-const MyMarkersList = ({schedule}) => {
-    const markers = schedule.map((x, i) => ({
-        key: i,
-        name: i,
-        position: [x["location"]['lat'], x["location"]['lng']],
-        content: x["brand"]
-
-    }));
-
-    const items = markers.map(({key, ...props}) => (
-        <MyPopupMarker key={key} {...props} />
-    ));
-    return <Fragment>{items}</Fragment>
-};
 
 export default class ListOfMarkers extends Component<> {
 

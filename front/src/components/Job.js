@@ -5,6 +5,7 @@ import React, {Component} from 'react';
 import {getOptions, OptionsContext, postJob} from "../lib/api";
 import update from 'immutability-helper';
 import Config from "./Config";
+import {saveEventStates, loadEventStates} from "../lib/localstorageManager";
 
 
 const startEvents = 5;
@@ -16,13 +17,7 @@ function get_empty() {
 const pureState = [...Array(startEvents)].map(() => (get_empty()));
 
 export class Job extends Component {
-    loadState = () => {
-        let loadedState = localStorage.getItem('eventStates');
-        if (loadedState) {
-            loadedState = JSON.parse(loadedState);
-            this.setState({eventStates: loadedState})
-        }
-    };
+
 
     constructor(props) {
         super(props);
@@ -38,8 +33,11 @@ export class Job extends Component {
         };
 
         getOptions((options) => {
-            this.setState({options: options});
-            this.loadState();
+            this.setState({
+                options: options,
+                eventStates: loadEventStates()
+            });
+
         });
         this.addEvent = this.addEvent.bind(this);
     }
@@ -63,7 +61,7 @@ export class Job extends Component {
     };
     onChangeConfig = (newConfig) => {
         this.setState((state) =>
-            ({config: update(state.config,{$merge: newConfig})}))
+            ({config: update(state.config, {$merge: newConfig})}))
     };
 
     addEvent = () => {
@@ -71,6 +69,7 @@ export class Job extends Component {
             eventStates: state.eventStates.concat([get_empty()])
         }))
     };
+
 
     send = () => {
         const job = {
@@ -80,12 +79,23 @@ export class Job extends Component {
         postJob(job, this.props.updateResult);
 
     };
-    save = () => {
-        localStorage.setItem('eventStates', JSON.stringify(this.state.eventStates))
+
+    downloadTxtFile = () => {
+        const element = document.createElement("a");
+        const file = new Blob([document.getElementById('myInput').value], {type: 'text/plain'});
+        element.href = URL.createObjectURL(file);
+        element.download = "myFile.txt";
+        document.body.appendChild(element); // Required for this to work in FireFox
+        element.click();
     };
+
 
     clear = () => {
         this.setState({eventStates: pureState})
+    };
+
+    save = () => {
+        saveEventStates(this.state.eventStates)
     };
 
     render() {

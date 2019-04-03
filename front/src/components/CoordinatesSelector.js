@@ -25,7 +25,6 @@ export default class CoordinatesSelector extends Component<> {
     handleClick = (e) => {
         const latlng = e.latlng;
         this.props.onChange({location: latlng});
-        console.log(e);
     };
 
 

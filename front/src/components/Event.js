@@ -103,14 +103,12 @@ export class Event extends Component {
     };
     onChangeType = (e, data) => {
         const value = data.value;
-        // console.log(e.target);
         this.props.onChange({type: value});
     };
 
 
     render() {
         const event = this.renderEvent(this.props.event);
-        console.log(this.props.event.type);
         return (
             <div className="ui raised segment">
                 <Dropdown clearable

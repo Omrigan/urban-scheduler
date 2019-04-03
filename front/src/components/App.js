@@ -27,12 +27,10 @@ class App extends Component {
         this.setState({result: result})
     };
     componentDidMount() {
-        console.log(process.env);
         document.title = process.env.REACT_APP_TITLE
     }
 
     render() {
-        console.log(this.state.result);
         return (<div className="container">
             <div className="row">
                 <div className="col-md-6 col-sm-12">
