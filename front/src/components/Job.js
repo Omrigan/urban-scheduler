@@ -33,6 +33,7 @@ export class Job extends Component {
             config: {
                 routingBackend: "dummy",
                 clipping: null,
+                solver: "python"
             }
         };
 

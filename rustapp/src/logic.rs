@@ -149,7 +149,7 @@ fn insert_after(old_path: &mut Path, new_segment: Path) {}
 
 
 fn calculate_distance(p1: &MyPoint, p2: &MyPoint) -> Distance {
-    return p1.get_point().vincenty_distance(&p2.get_point()).unwrap();
+    return p1.get_point().euclidean_distance(&p2.get_point());
 }
 
 
@@ -169,8 +169,6 @@ fn squash_distances(first: DistanceMatrix, second: DistanceMatrix) -> (DistanceM
     let mut result_answers = AnswersMatrix::zeros(result_shape.0, result_shape.1);
     for i in 0..result_shape.0 {
         for j in 0..result_shape.1 {
-            println!("{} {}", first.row(i).nrows(), first.row(i).ncols());
-            println!("{} {}", second.transpose().row(j).nrows(), second.transpose().row(j).ncols());
             let dists: RowDVector<f64> = first.row(i) + second.transpose().row(j);
             let argmin = dists.matrix_argmin();
             *result_answers.index_mut((i, j)) = argmin.1;

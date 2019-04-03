@@ -18,7 +18,21 @@ const routingBackends = [
     }
 ];
 
+const solvers = [
+    {
+        text: "Python",
+        key: 2,
+        value: "python"
+    },
+    {
+        text: "Rust",
+        key: 1,
+        value: "rust"
+    }
+];
+
 export default class Config extends Component {
+
     onClippingChange = (e) => {
         const value = e.target.value;
         this.props.onChangeConfig({
@@ -33,10 +47,21 @@ export default class Config extends Component {
         });
     };
 
+    onChangeSolver = (e, data) => {
+        const value = data.value;
+        this.props.onChangeConfig({
+            solver: value,
+        });
+    };
+
 
     render() {
         return (<div className="ui raised segment">
             <h4>Config</h4>
+            Solver: <Dropdown placeholder='Solver'
+                      defaultValue={this.props.config.solver}
+                      onChange={this.onChangeSolver}
+                      fluid selection options={solvers}/>
             Routing backend: <Dropdown placeholder='Routing backend'
                       defaultValue={this.props.config.routingBackend}
                       onChange={this.onChangeBackend}

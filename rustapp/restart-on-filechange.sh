@@ -13,9 +13,9 @@ sigint_handler()
 
 trap sigint_handler SIGINT
 
-cargo build
+cargo build --release
 while true; do
-  cargo run &
+  cargo run --release &
   PID=$!
   sleep 5
   inotifywait -e modify -e move -e create -e delete -e attrib -r `pwd`
