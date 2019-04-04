@@ -3,14 +3,14 @@ name: default
 
 steps:
 - name: run
-  image: docker
+  image: docker/compose
   commands:
   - cd deploy/dev
   - docker-compose up
   volumes:
   - name: docker
     path: /var/run/docker.sock
-    
+
 - name: build-app
   image: docker
   commands:
