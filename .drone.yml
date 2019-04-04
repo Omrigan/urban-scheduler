@@ -2,6 +2,15 @@ kind: pipeline
 name: default
 
 steps:
+- name: run
+  image: docker
+  commands:
+  - cd deploy/dev
+  - docker-compose up
+  volumes:
+  - name: docker
+    path: /var/run/docker.sock
+    
 - name: build-app
   image: docker
   commands:
@@ -11,7 +20,7 @@ steps:
   - name: docker
     path: /var/run/docker.sock
 
-    
+
 volumes:
   - name: docker
     host:
