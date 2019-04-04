@@ -6,6 +6,7 @@
     "axios": "^0.18.0",
     "bootstrap": "^4.2.1",
     "immutability-helper": "^3.0.0",
+    "js-yaml": "^3.13.0",
     "leaflet": "^1.4.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",

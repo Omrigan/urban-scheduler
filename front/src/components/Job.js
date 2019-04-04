@@ -1,14 +1,14 @@
 import {Event} from "./Event";
 // import {Button} from "reactstrap";
-import {Button} from "semantic-ui-react";
+import {Button, Label, Icon} from "semantic-ui-react";
 import React, {Component} from 'react';
 import {getOptions, OptionsContext, postJob} from "../lib/api";
 import update from 'immutability-helper';
 import Config from "./Config";
 import {saveEventStates, loadEventStates} from "../lib/localstorageManager";
+import {safeLoad, safeDump} from "js-yaml"
 
-
-const startEvents = 5;
+const startEvents = 0;
 
 function get_empty() {
     return {type: null};
@@ -80,13 +80,26 @@ export class Job extends Component {
 
     };
 
-    downloadTxtFile = () => {
+    exportProblemFile = () => {
         const element = document.createElement("a");
-        const file = new Blob([document.getElementById('myInput').value], {type: 'text/plain'});
+        const file = new Blob([safeDump(this.state.eventStates)], {type: 'plain/text'});
         element.href = URL.createObjectURL(file);
-        element.download = "myFile.txt";
+        element.download = "problem.yaml";
         document.body.appendChild(element); // Required for this to work in FireFox
         element.click();
+    };
+    importProblemFile = (e) => {
+        let file = e.target.files[0];
+        if (!file) {
+            return;
+        }
+        let reader = new FileReader();
+        reader.onload = (e) => {
+            let contents = safeLoad(e.target.result);
+            // Display file content
+            this.setState({eventStates: contents})
+        };
+        reader.readAsText(file);
     };
 
 
@@ -95,7 +108,8 @@ export class Job extends Component {
     };
 
     save = () => {
-        saveEventStates(this.state.eventStates)
+        saveEventStates(this.state.eventStates);
+        this.props.saveResult();
     };
 
     render() {
@@ -110,7 +124,21 @@ export class Job extends Component {
                         onClick={this.save}>Save</Button>
                 <Button color='teal'
                         onClick={this.clear}>Clear</Button>
-
+                <Button color='purple'
+                        onClick={this.exportProblemFile}>Export</Button>
+                <Button
+                    as="label"
+                    basic
+                    htmlFor="upload"
+                >
+                    Import
+                    <input onChange={this.importProblemFile}
+                           hidden
+                           id="upload"
+                           multiple
+                           type="file"
+                    />
+                </Button>
                 <OptionsContext.Provider value={this.state.options}>
                     {this.state.eventStates.map((x, i) =>
                         <Event key={i.toString()}
