@@ -5,12 +5,12 @@ services: {
     container_name: osrm,
     image: osrm/osrm-backend,
     command: osrm-routed --algorithm mld /data/moscow.osrm,
-    volumes: ["data/osrm:/data"],
+    volumes: ["../../data/osrm:/data"],
   },
   mongo:{
     container_name: mongo,
     image: mongo,
-    volumes:["data/mongo:/data/db"]
+    volumes:["../../data/mongo:/data/db"]
   },
   app: {
     container_name: app,
