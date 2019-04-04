@@ -1,0 +1,34 @@
+version: '3'
+
+services: {
+  osrm:{
+    container_name: osrm,
+    image: osrm/osrm-backend,
+    command: osrm-routed --algorithm mld /data/moscow.osrm,
+    volumes: ["data/osrm:/data"],
+  },
+  mongo:{
+    container_name: mongo,
+    image: mongo,
+    volumes:["data/mongo:/data/db"]
+  },
+  app: {
+    container_name: app,
+    image: app,
+    build: ../../app,
+    ports: ["89:80"]
+  },
+  rustapp: {
+    container_name: rustapp,
+    image: rustapp,
+    build: ../../rustapp,
+  },
+  front: {
+    container_name: front,
+    image: front,
+    build: ../../front,
+    ports: ["80:80"],
+  },
+}
+
+
