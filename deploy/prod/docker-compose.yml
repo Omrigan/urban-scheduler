@@ -2,29 +2,26 @@ version: '3'
 
 services: {
   osrm:{
-    container_name: osrm,
     image: osrm/osrm-backend,
     command: osrm-routed --algorithm mld /data/moscow.osrm,
     volumes: ["../../data/osrm:/data"],
+    expose: [5000]
   },
   mongo:{
-    container_name: mongo,
     image: mongo,
-    volumes:["../../data/mongo:/data/db"]
+    volumes:["../../data/mongo:/data/db"],
+    expose: [27017]
   },
   app: {
-    container_name: app,
     image: registry.urbanscheduler.ml/app,
     build: ../../app,
     ports: ["89:80"]
   },
   rustapp: {
-    container_name: rustapp,
     image: registry.urbanscheduler.ml/rustapp,
     build: ../../rustapp,
   },
   front: {
-    container_name: front,
     image: registry.urbanscheduler.ml/front,
     build: ../../front,
     ports: ["80:80"],

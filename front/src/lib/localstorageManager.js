@@ -9,7 +9,7 @@ export const loadEventStates = () => {
         loadedState = JSON.parse(loadedState);
         return loadedState;
     }
-    return null;
+    return [];
 };
 
 export const saveResult = (eventStates) => {

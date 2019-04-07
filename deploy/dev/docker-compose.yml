@@ -2,20 +2,17 @@ version: '3.4'
 
 services: {
   osrm:{
-    container_name: osrm,
     image: osrm/osrm-backend,
     command: osrm-routed --algorithm mld /data/moscow.osrm,
     volumes: ["../../data/osrm:/data"],
     ports: ["5000:5000"]
   },
   mongo:{
-    container_name: mongo,
     image: mongo,
     ports: ["27017:27017"],
     volumes:["../../data/mongo:/data/db"]
   },
   app: {
-    container_name: app,
     image: "registry.urbanscheduler.ml/app:dev",
     build: ../../app,
     volumes: [
@@ -27,7 +24,6 @@ services: {
     ports: ["89:80"]
   },
   rustapp: {
-    container_name: rustapp,
     image: "registry.urbanscheduler.ml/rustapp:dev",
     build: {
       context: ../../rustapp,
@@ -38,7 +34,6 @@ services: {
     command: /rustapp/restart-on-filechange.sh
   },
   front: {
-    container_name: front,
     image: "registry.urbanscheduler.ml/front:dev",
     build: {
       context: ../../front,
