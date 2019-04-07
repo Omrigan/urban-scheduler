@@ -1,4 +1,4 @@
-version: '3'
+version: '3.4'
 
 services: {
   osrm:{
@@ -16,7 +16,7 @@ services: {
   },
   app: {
     container_name: app,
-    image: registry.urbanscheduler.ml/app:dev,
+    image: "registry.urbanscheduler.ml/app:dev",
     build: ../../app,
     volumes: [
       "../../app:/app",
@@ -28,20 +28,24 @@ services: {
   },
   rustapp: {
     container_name: rustapp,
-    image: registry.urbanscheduler.ml/rustapp:dev,
-    build: ../../rustapp,
+    image: "registry.urbanscheduler.ml/rustapp:dev",
+    build: {
+      context: ../../rustapp,
+      target: "build",
+    },
     ports: ["90:80"],
     volumes: ["../../rustapp:/rustapp"],
-    target: build,
     command: /rustapp/restart-on-filechange.sh
   },
   front: {
     container_name: front,
-    image: registry.urbanscheduler.ml/front:dev,
-    build: ../../front,
+    image: "registry.urbanscheduler.ml/front:dev",
+    build: {
+      context: ../../front,
+      target: "build"
+    },
     ports: ["80:80"],
     volumes: ["../../front:/front"],
-    target: build,
     command: npm start
   },
 }
