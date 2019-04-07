@@ -23,16 +23,19 @@ steps:
     image: appleboy/drone-ssh
     settings:
       host: urbanscheduler.ml
-      username: cloud-user
+      username: omrigan
       port: 22
-      secrets: [ ssh_key ]
+      volumes:
+         - name: ssh_key
+           path: key
+      key_path: key
       script:
         - cd ~/urban-scheduler/deploy/prod
         - docker-compose pull
         - docker-compose up -d
     when:
       branch: master
-      event: push
+      event: push1
 
 image_pull_secrets:
   - dockerconfigjson
@@ -42,3 +45,7 @@ volumes:
   - name: docker
     host:
       path: /var/run/docker.sock
+
+  - name: ssh_key
+    host:
+      path: .ssh/kolobok-devservices
