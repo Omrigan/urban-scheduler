@@ -2,23 +2,30 @@ kind: pipeline
 name: default
 
 steps:
-- name: run
-  image: docker/compose:1.24.0
-  commands:
-  - cd deploy/prod
-  - docker-compose up
-  volumes:
-  - name: docker
-    path: /var/run/docker.sock
+  - name: build
+    image: docker/compose:1.24.0
+    commands:
+      - cd deploy/prod
+      - docker-compose build
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
 
-#- name: build-app
-#  image: docker
-#  commands:
-#  - cd app
-#  - docker build .
-#  volumes:
-#  - name: docker
-#    path: /var/run/docker.sock
+  - name: deploy
+    image: appleboy/drone-ssh
+    host: urbanscheduler.ml
+    username: cloud-user
+    port: 22
+    secrets: [ ssh_key ]
+    script:
+      - cd ~/urban-scheduler/deploy/prod
+      - docker-compose pull
+      - docker-compose up -d
+    when:
+      branch: master
+      event: push
+
+
 
 
 volumes:
