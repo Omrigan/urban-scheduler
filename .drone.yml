@@ -7,18 +7,18 @@ steps:
     commands:
       - cd deploy/prod
       - docker version
-      - export
-      - echo  ${PASSWORD} | docker login -u ${USERNAME} --password-stdin registry.urbanscheduler.ml
+#      - export
+#      - echo  $PASSWORD | docker login -u $USERNAME --password-stdin registry.urbanscheduler.ml
       - docker-compose build
       - docker-compose push
     volumes:
       - name: docker
         path: /var/run/docker.sock
-    environment:
-      USERNAME:
-        from_secret: registry_username
-      PASSWORD:
-        from_secret: registry_password
+#    environment:
+#      USERNAME:
+#        from_secret: registry_username
+#      PASSWORD:
+#        from_secret: registry_password
 
 
   - name: deploy
@@ -35,7 +35,8 @@ steps:
       branch: master
       event: push
 
-
+image_pull_secrets:
+  dockerloginjson
 
 
 volumes:
