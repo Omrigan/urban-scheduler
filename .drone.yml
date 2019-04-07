@@ -3,7 +3,7 @@ name: default
 
 steps:
   - name: build
-    image: docker/compose:1.24.0
+    image: docker/compose:latest
     commands:
       - cd deploy/prod
       - echo  ${PASSWORD} | docker login -u ${USERNAME} --password-stdin registry.urbanscheduler.ml
