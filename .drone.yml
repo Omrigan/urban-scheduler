@@ -6,7 +6,7 @@ steps:
     image: docker/compose:1.24.0
     commands:
       - cd deploy/prod
-      - docker login -u $USERNAME -p $PASSWORD registry.urbanscheduler.ml
+      - docker login -u ${USERNAME} -p ${PASSWORD} registry.urbanscheduler.ml
       - docker-compose build
       - docker-compose push
     volumes:
