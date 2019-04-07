@@ -25,7 +25,8 @@ steps:
       host: urbanscheduler.ml
       username: cloud-user
       port: 22
-      ssh_key: [ ssh_key ]
+      ssh_key:
+        from_secret: ssh_key
       script:
         - cd ~/urban-scheduler/deploy/prod
         - docker-compose pull
