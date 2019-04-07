@@ -6,11 +6,18 @@ steps:
     image: docker/compose:1.24.0
     commands:
       - cd deploy/prod
+      - docker login -u ${USERNAME} -p ${PASSWORD}
       - docker-compose build
       - docker-compose push
     volumes:
       - name: docker
         path: /var/run/docker.sock
+    environment:
+      USERNAME:
+        from_secret: $registry_username
+      PASSWORD:
+        from_secret: $registry_password
+
 
   - name: deploy
     image: appleboy/drone-ssh
