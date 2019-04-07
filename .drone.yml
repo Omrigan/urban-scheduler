@@ -3,9 +3,10 @@ name: default
 
 steps:
   - name: build
-    image: docker/compose:latest
+    image: docker/compose:1.24.0
     commands:
       - cd deploy/prod
+      - docker version
       - echo  ${PASSWORD} | docker login -u ${USERNAME} --password-stdin registry.urbanscheduler.ml
       - docker-compose build
       - docker-compose push
