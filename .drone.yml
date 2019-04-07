@@ -10,7 +10,8 @@ steps:
 #      - export
 #      - echo  $PASSWORD | docker login -u $USERNAME --password-stdin registry.urbanscheduler.ml
       - docker-compose build
-      - docker-compose push
+      - docker push registry.urbanscheduler.ml/app
+#      - docker-compose push
     volumes:
       - name: docker
         path: /var/run/docker.sock
