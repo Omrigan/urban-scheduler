@@ -16,7 +16,7 @@ services: {
   },
   app: {
     container_name: app,
-    image: app,
+    image: registry.urbanscheduler.ml/app:dev,
     build: ../../app,
     volumes: [
       "../../app:/app",
@@ -28,18 +28,20 @@ services: {
   },
   rustapp: {
     container_name: rustapp,
-    image: rustapp,
+    image: registry.urbanscheduler.ml/rustapp:dev,
     build: ../../rustapp,
     ports: ["90:80"],
     volumes: ["../../rustapp:/rustapp"],
+    target: build,
     command: /rustapp/restart-on-filechange.sh
   },
   front: {
     container_name: front,
-    image: front,
+    image: registry.urbanscheduler.ml/front:dev,
     build: ../../front,
     ports: ["80:80"],
     volumes: ["../../front:/front"],
+    target: build,
     command: npm start
   },
 }
