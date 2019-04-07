@@ -18,21 +18,20 @@ steps:
       PASSWORD:
         from_secret: registry_password
 
-
   - name: deploy
     image: appleboy/drone-ssh
     settings:
       host: urbanscheduler.ml
       username: omrigan
       port: 22
-      volumes:
-         - name: ssh_key
-           path: key
       key_path: key
       script:
         - cd ~/urban-scheduler/deploy/prod
         - docker-compose pull
         - docker-compose up -d
+    volumes:
+      - name: ssh_key
+        path: key
     when:
       branch: master
       event: push1
