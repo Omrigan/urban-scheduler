@@ -14,18 +14,18 @@ services: {
   },
   app: {
     container_name: app,
-    image: app,
+    image: registry.urbanscheduler.ml/app,
     build: ../../app,
     ports: ["89:80"]
   },
   rustapp: {
     container_name: rustapp,
-    image: rustapp,
+    image: registry.urbanscheduler.ml/rustapp,
     build: ../../rustapp,
   },
   front: {
     container_name: front,
-    image: front,
+    image: registry.urbanscheduler.ml/front,
     build: ../../front,
     ports: ["80:80"],
   },

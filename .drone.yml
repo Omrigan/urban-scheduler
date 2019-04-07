@@ -7,6 +7,7 @@ steps:
     commands:
       - cd deploy/prod
       - docker-compose build
+      - docker-compose push
     volumes:
       - name: docker
         path: /var/run/docker.sock
