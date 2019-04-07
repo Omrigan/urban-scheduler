@@ -2,6 +2,8 @@ FROM node as build
 
 WORKDIR /front
 ADD . /front
+
+RUN npm install
 RUN npm run build
 FROM nginx:latest
 
