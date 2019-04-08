@@ -3,13 +3,15 @@
 #[macro_use]
 extern crate rocket;
 
-use rocket_contrib::json::{Json, JsonValue};
+use rocket_contrib::json::{Json};
 use rocket::Rocket;
 
-use crate::logic::{Problem, Solution, solve_ordered};
+use crate::solve_ordered::{Problem, Solution, solve_ordered};
 use rocket::config::{Config, Environment};
 
-mod logic;
+mod solve_ordered;
+mod distances;
+mod events;
 
 #[post("/predict_raw", format = "json", data = "<problem_raw>")]
 fn predict_raw(problem_raw: Json<Problem>) -> Json<Solution> {
