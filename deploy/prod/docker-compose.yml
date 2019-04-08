@@ -19,6 +19,7 @@ services: {
   },
   rustapp: {
     image: registry.urbanscheduler.ml/rustapp,
+    command: /usr/local/bin/usrust,
     build: ../../rustapp,
   },
   front: {
