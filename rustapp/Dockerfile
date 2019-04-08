@@ -6,7 +6,7 @@ RUN apt-get install musl-tools -y
 
 RUN rustup target add x86_64-unknown-linux-musl
 
-WORKDIR /usr/src/myapp
+WORKDIR /usr/src/usrust
 
 COPY Cargo.toml Cargo.toml
 
@@ -16,9 +16,11 @@ RUN echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main
 
 RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl
 
-RUN rm -f target/x86_64-unknown-linux-musl/release/deps/myapp*
+RUN rm -f target/x86_64-unknown-linux-musl/release/deps/usrust*
 
 COPY . .
+
+RUN cargo test
 
 RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl
 
@@ -28,6 +30,6 @@ RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-li
 
 FROM alpine:latest
 
-COPY --from=cargo-build /usr/src/myapp/target/x86_64-unknown-linux-musl/release/usrust /usr/local/bin/usrust
+COPY --from=build /usr/src/usrust/target/x86_64-unknown-linux-musl/release/usrust /usr/local/bin/usrust
 
 CMD ["usrust"]
