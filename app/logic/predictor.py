@@ -6,8 +6,10 @@ from datetime import datetime, timedelta
 import geopy.distance
 import numpy as np
 
+from lib import cities
+
 from process import connector
-from exceptions import InvalidRequest, InvalidEvent
+from exceptions import InvalidRequest, InvalidEvent, InvalidCity
 from logic.event_types import EventTypes
 import random
 import osm_connector
@@ -26,7 +28,11 @@ def normalize_config(config):
     if config is None:
         config = {}
     result = {}
-
+    city = config.get("city")
+    if city not in cities:
+        raise InvalidCity(city)
+    
+    result["city"] = city
     result['dists_method'] = config.get('routingBackend') or 'dummy'
     result["clipping"] = int(config.get('clipping') or 50)
     result["solver"] = config.get("solver") or "python"

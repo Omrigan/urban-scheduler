@@ -1,6 +1,17 @@
 {
+  #https://www.mapdevelopers.com/draw-circle-tool.php
   "moscow": {
-      "radius": 20000,
-      "center": [55.7494539, 37.62160470000001]
+    "radius": 20000,
+    "center": [55.7494539, 37.62160470000001]
+  },
+  "helsinki": {
+    "radius": 26000,
+    "center": [60.180995,24.952891],
+      "bbox": {
+        "top": 60.3769,
+        "bottom": 60.0772,
+        "left": 24.3656,
+        "right": 25.4409
+      }
   }
 }

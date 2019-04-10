@@ -21,6 +21,10 @@ parser.add_argument('--cat', type=str,
 parser.add_argument('--provider', type=str,
                     help='Provider of source process', required=True)
 
+
+parser.add_argument('--city', type=str,
+                    help='City', required=True)
+
 args = parser.parse_args()
 
 expr = re.compile("(\s+|-)")
@@ -35,6 +39,8 @@ def get_brand(name):
 def insert_all(places):
     db = connector.get_db()
     collection = db.places
+    for place in places:
+        place["city"] = args.city
     collection.insert_many(places)
 
 

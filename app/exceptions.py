@@ -32,3 +32,13 @@ class InvalidEvent(USException):
     def __init__(self, event, reason):
         self.message = self.message % (event, reason)
         super(InvalidEvent, self).__init__()
+
+
+class InvalidCity(USException):
+    code = 'US3'
+    message = 'City %s is invalid. "'
+
+    def __init__(self, city):
+        self.message = self.message % (city, )
+        super(InvalidCity, self).__init__()
+
