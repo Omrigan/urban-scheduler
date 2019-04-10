@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {Input, Dropdown} from 'semantic-ui-react'
-import {OptionsContext} from '../lib/api'
+import {OptionsContext, CenterContext} from '../lib/api'
 import '../App.css'
 import CoordinatesSelector from './CoordinatesSelector'
 
@@ -28,15 +28,20 @@ class FixedEvent extends Component {
     };
 
     render() {
-        return (<React.Fragment>
-            <Input placeholder="Place name"
-                   fluid
-                   defaultValue={this.props.event.name}
-                   onChange={this.onTextChange}/>
-            <CoordinatesSelector center={[55.7494539, 37.62160470000001]}
-                                 onChange={this.props.onChange}
-                                 location={this.props.event.location}/>
-        </React.Fragment>)
+        return (
+            <CenterContext.Consumer>
+                {center =>
+                    <React.Fragment>
+                        <Input placeholder="Place name"
+                               fluid
+                               defaultValue={this.props.event.name}
+                               onChange={this.onTextChange}/>
+                        <CoordinatesSelector center={center}
+                                             onChange={this.props.onChange}
+                                             location={this.props.event.location}/>
+                    </React.Fragment>}
+            </CenterContext.Consumer>
+        )
     }
 }
 

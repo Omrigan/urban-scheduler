@@ -2,11 +2,12 @@ import {Event} from "./Event";
 // import {Button} from "reactstrap";
 import {Button, Label, Icon} from "semantic-ui-react";
 import React, {Component} from 'react';
-import {getOptions, OptionsContext, postJob} from "../lib/api";
+import {getCities, getOptions, OptionsContext, CenterContext, postJob} from "../lib/api";
 import update from 'immutability-helper';
 import Config from "./Config";
 import {saveEventStates, loadEventStates} from "../lib/localstorageManager";
 import {safeLoad, safeDump} from "js-yaml"
+
 
 const startEvents = 0;
 
@@ -29,7 +30,9 @@ export class Job extends Component {
                 routingBackend: "dummy",
                 clipping: null,
                 solver: "python"
-            }
+            },
+            cities: [],
+            citiesRaw: [],
         };
 
         getOptions((options) => {
@@ -39,6 +42,10 @@ export class Job extends Component {
             });
 
         });
+
+
+        getCities(this.setState.bind(this));
+
         this.addEvent = this.addEvent.bind(this);
     }
 
@@ -60,6 +67,7 @@ export class Job extends Component {
 
     };
     onChangeConfig = (newConfig) => {
+        console.log(newConfig);
         this.setState((state) =>
             ({config: update(state.config, {$merge: newConfig})}))
     };
@@ -113,11 +121,20 @@ export class Job extends Component {
         this.props.saveResult();
     };
 
+    getCenter = () => {
+        if(this.state.config.city){
+            return this.state.citiesRaw[this.state.config.city].center
+        } else{
+            return ([0, 0])
+        }
+    };
+
     render() {
         return (
             <div className="">
                 <Config onChangeConfig={this.onChangeConfig}
-                        config={this.state.config}/>
+                        config={this.state.config}
+                        cities={this.state.cities}/>
 
                 <Button color='green' onClick={this.send}>Send</Button>
                 <Button primary onClick={this.addEvent}>Add</Button>
@@ -140,14 +157,16 @@ export class Job extends Component {
                            type="file"
                     />
                 </Button>
-                <OptionsContext.Provider value={this.state.options}>
-                    {this.state.eventStates.map((x, i) =>
-                        <Event key={i.toString()}
-                               event={x}
-                               onChange={this.eventChanged.bind(this, i)}/>
-                    )} <br/>
+                <CenterContext.Provider value={this.getCenter()}>
+                    <OptionsContext.Provider value={this.state.options}>
+                        {this.state.eventStates.map((x, i) =>
+                            <Event key={i.toString()}
+                                   event={x}
+                                   onChange={this.eventChanged.bind(this, i)}/>
+                        )} <br/>
 
-                </OptionsContext.Provider>
+                    </OptionsContext.Provider>
+                </CenterContext.Provider>
             </div>
         );
     }

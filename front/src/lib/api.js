@@ -28,8 +28,27 @@ const fetchCallback = (setState, result) => {
 
 export const OptionsContext = React.createContext({});
 
+export const CenterContext = React.createContext([0, 0]);
+
+
 export const getOptions = (setState) => {
     return axios.get(BACKEND_URL + '/get_params').then((result) => fetchCallback(setState, result));
+};
+
+
+export const getCities = (setState) => {
+    axios.get(BACKEND_URL + '/cities').then((result) => {
+        const cityOptions = Object.keys(result.data);
+        const cityOptions2 = cityOptions.map((city) =>
+            ({
+                text: city,
+                key: city,
+                value: city
+            }));
+        console.log(cityOptions2);
+
+        setState(() => ({cities: cityOptions2, citiesRaw: result.data}));
+    });
 };
 
 

@@ -31,7 +31,7 @@ def normalize_config(config):
     city = config.get("city")
     if city not in cities:
         raise InvalidCity(city)
-    
+
     result["city"] = city
     result['dists_method'] = config.get('routingBackend') or 'dummy'
     result["clipping"] = int(config.get('clipping') or 50)
@@ -213,7 +213,7 @@ class Predictor:
         elif type == 'category':
             category = event.get('category')
             brand = event.get('brand')
-            query = {"categories": category}
+            query = {"categories": category, "city": self.config['city']}
             if brand:
                 query['brand'] = brand
             result = list(places.find(query, {'location': 1}))
@@ -232,3 +232,6 @@ class Predictor:
             "config": self.config,
             'finish_time': self.finish_time.strftime("%c")
         }
+
+    def center(self):
+        return cities[self.config['city']]['center']

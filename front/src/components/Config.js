@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import {Input, Dropdown} from 'semantic-ui-react'
 import '../App.css'
 
+import {loadResult} from "../lib/localstorageManager";
+
 
 const routingBackends = [
     {
@@ -16,7 +18,7 @@ const routingBackends = [
     },
     {
         text: "Here",
-        key: 2,
+        key: 3,
         value: "here"
     }
 ];
@@ -24,17 +26,24 @@ const routingBackends = [
 const solvers = [
     {
         text: "Python",
-        key: 2,
+        key: 1,
         value: "python"
     },
     {
         text: "Rust",
-        key: 1,
+        key: 2,
         value: "rust"
     }
 ];
 
 export default class Config extends Component {
+
+    constructor(props) {
+        super(props);
+
+
+    }
+
 
     onClippingChange = (e) => {
         const value = e.target.value;
@@ -50,6 +59,13 @@ export default class Config extends Component {
         });
     };
 
+    onChangeCity = (e, data) => {
+        const value = data.value;
+        this.props.onChangeConfig({
+            city: value,
+        });
+    };
+
     onChangeSolver = (e, data) => {
         const value = data.value;
         this.props.onChangeConfig({
@@ -61,18 +77,22 @@ export default class Config extends Component {
     render() {
         return (<div className="ui raised segment">
             <h4>Config</h4>
+            City: <Dropdown placeholder='City'
+                              defaultValue={this.props.config.city}
+                              onChange={this.onChangeCity}
+                              fluid selection options={this.props.cities}/>
             Solver: <Dropdown placeholder='Solver'
-                      defaultValue={this.props.config.solver}
-                      onChange={this.onChangeSolver}
-                      fluid selection options={solvers}/>
+                              defaultValue={this.props.config.solver}
+                              onChange={this.onChangeSolver}
+                              fluid selection options={solvers}/>
             Routing backend: <Dropdown placeholder='Routing backend'
-                      defaultValue={this.props.config.routingBackend}
-                      onChange={this.onChangeBackend}
-                      fluid selection options={routingBackends}/>
-            Number of candidates per event:  <Input placeholder="Clipping"
-                   fluid
-                   defaultValue={this.props.config.clipping}
-                   onChange={this.onClippingChange}/>
+                                       defaultValue={this.props.config.routingBackend}
+                                       onChange={this.onChangeBackend}
+                                       fluid selection options={routingBackends}/>
+            Number of candidates per event: <Input placeholder="Clipping"
+                                                   fluid
+                                                   defaultValue={this.props.config.clipping}
+                                                   onChange={this.onClippingChange}/>
         </div>)
     }
 }
