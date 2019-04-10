@@ -3,7 +3,7 @@
 import numpy as np
 import requests, os
 
-BASE_URL = os.getenv('OSRM_URL')
+BASE_URL = "http://osrm:5000/table/v1"
 
 
 def calcualte_distances(profile, src, dist):

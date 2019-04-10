@@ -1,7 +1,7 @@
 use nalgebra::{Matrix, DMatrix, RowDVector};
 use nalgebra::base::{Scalar, Dim};
 use nalgebra::storage::Storage;
-use rand::{thread_rng, seq};
+use rand::{thread_rng, seq::SliceRandom};
 use serde::{Serialize, Deserialize};
 
 use crate::distances::{DistsMethod, DistanceMatrix, calculate_distance};
@@ -24,7 +24,9 @@ impl Default for SolveAlgorithm {
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 struct Config {
+    #[serde(default)]
     dists_method: DistsMethod,
+    #[serde(default)]
     solve_algorithm: SolveAlgorithm,
 }
 
@@ -100,7 +102,7 @@ fn squash_distances(first: DistanceMatrix, second: DistanceMatrix) -> (DistanceM
 
 fn sample_any(event: &Event) -> &MyPoint {
     let mut rng = thread_rng();
-    seq::sample_iter(&mut rng, event.points.iter(), 1).unwrap()[0]
+    event.points.choose(&mut rng).unwrap()
 }
 
 pub fn solve_ordered(p: &Problem) -> Solution {
@@ -218,7 +220,7 @@ mod tests {
     fn test_serialize() {
         let p = get_sample_problem();
         let serialized = serde_json::to_string(&p).unwrap();
-        println!("serialized = {}", serialized);
+//        println!("serialized = {}", serialized);
         assert_eq!(serialized, r#"{"ordered_events":[{"idx":0,"points":[{"coords":[1.0,2.0],"idx":0}]}],"config":{"dists_method":"dummy","solve_algorithm":"ordered"}}"#);
 //        assert_eq!(s.schedule.len(), p.ordered_events.len());
     }

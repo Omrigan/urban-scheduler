@@ -7,4 +7,4 @@ deploy/prod/.env
 .ipynb_checkpoints/
 token.json
 rustapp/target
-
+.env.private

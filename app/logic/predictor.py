@@ -150,7 +150,8 @@ class Predictor:
             rust_events.append(this_event)
 
         self.checkpoint("rust_data_prepared")
-        result = requests.post(RUST_URL, json={"ordered_events": rust_events}).json()
+        result = requests.post(RUST_URL, json={"ordered_events": rust_events,
+                                               "config": self.config}).json()
         self.checkpoint("rust_completed")
         answer = []
         for dct, point in zip(events_int_to_mongo, result['schedule']):

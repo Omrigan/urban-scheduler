@@ -20,4 +20,8 @@ impl MyPoint {
     pub fn get_point(&self) -> Point<f64> {
         Point::from(self.coords)
     }
+    pub fn get_string_repr(&self) -> String {
+        format!("{},{}", self.coords.0, self.coords.1)
+    }
+
 }

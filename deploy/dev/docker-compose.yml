@@ -29,6 +29,7 @@ services: {
       context: ../../rustapp,
       target: "build",
     },
+    env_file: [.env.private],
     ports: ["90:80"],
     volumes: ["../../rustapp:/rustapp"],
     command: /rustapp/restart-on-filechange.sh
