@@ -33,6 +33,8 @@ export const getOptions = (setState) => {
 };
 
 
-export const postJob = (data, callbackResult) => {
-    axios.post(BACKEND_URL + '/predict', data).then((response) => callbackResult(response.data))
+export const postJob = (data, updateResult) => {
+    axios.post(BACKEND_URL + '/predict', data)
+        .catch((error) => updateResult(null, error.response.data))
+        .then((response) => updateResult(response.data, null));
 };

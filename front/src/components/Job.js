@@ -72,6 +72,7 @@ export class Job extends Component {
 
 
     send = () => {
+        this.props.startPredict();
         const job = {
             ordered_events: this.state.eventStates,
             config: this.state.config

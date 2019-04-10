@@ -4,6 +4,9 @@ import '../App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Job} from './Job';
 import {Result} from './Result';
+import {Error} from './Error';
+import {InProgress} from './InProgress';
+
 import 'leaflet/dist/leaflet.css'
 
 import {saveResult, loadResult} from "../lib/localstorageManager";
@@ -21,13 +24,18 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            result: loadResult()
+            result: loadResult(),
+            inprogress: false
         }
 
     }
 
-    updateResult = (result) => {
-        this.setState({result: result})
+    updateResult = (result, error) => {
+        this.setState({inprogress: false, result: result, error: error})
+    };
+
+    startPredict = () => {
+        this.setState({inprogress: true, result: null, error: null})
     };
 
     saveResult = () => {
@@ -43,12 +51,14 @@ class App extends Component {
             <div className="row">
                 <div className="col-md-6 col-sm-12">
                     <h2>Job</h2>
-                    <Job updateResult={this.updateResult} saveResult={this.saveResult}/>
+                    <Job updateResult={this.updateResult} saveResult={this.saveResult} startPredict={this.startPredict}/>
                 </div>
 
                 <div className="col-md-6 col-sm-12">
                     <h2>Result</h2>
                     {this.state.result && <Result result={this.state.result}/>}
+                    {this.state.error && <Error error={this.state.error}/>}
+                    {this.state.inprogress && <InProgress />}
                 </div>
             </div>
 
