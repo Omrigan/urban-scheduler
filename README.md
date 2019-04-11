@@ -9,7 +9,8 @@ Urban Scheduler is able to substitute event placeholder with actual place, optim
 
 ### Supported cities:
 
-moscow
+- Moscow
+- Helsinki
 
 ## Underlying technologies
 The system is written in python, Rust and JavaScript. 
@@ -36,4 +37,4 @@ Used for some places data.
 
 The system is able to solve the optimization problem called "POGTSP" - Partial-Ordered Generalized Travelling Salesman Problem.
 
-The optimization is performed through dynamic programming.
+The optimization is performed through mixed algorithm: branch&bound and dynamic programming.
