@@ -15,7 +15,11 @@ services: {
   app: {
     image: registry.urbanscheduler.ml/app,
     build: ../../app,
-    ports: ["89:80"]
+    expose: [80],
+    environment: {
+      VIRTUAL_HOST: api.urbanscheduler.ml,
+      LETSENCRYPT_HOST: api.urbanscheduler.ml
+    }
   },
   rustapp: {
     image: registry.urbanscheduler.ml/rustapp,
@@ -25,8 +29,16 @@ services: {
   front: {
     image: registry.urbanscheduler.ml/front,
     build: ../../front,
-    ports: ["80:80"],
+    expose: [80],
+    environment: {
+        VIRTUAL_HOST: urbanscheduler.ml,
+        LETSENCRYPT_HOST: urbanscheduler.ml
+    }
   },
 }
+networks:
+  default:
+    external:
+      name: webproxy
 
 

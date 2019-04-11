@@ -10,6 +10,8 @@ WORKDIR /usr/src/usrust
 
 COPY Cargo.toml Cargo.toml
 
+COPY Cargo.lock Cargo.lock
+
 RUN mkdir src/
 
 RUN echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main.rs
@@ -22,7 +24,8 @@ COPY . .
 
 RUN cargo test --release --target=x86_64-unknown-linux-musl
 
-RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl
+RUN
+cargo build --release --target=x86_64-unknown-linux-musl
 
 # ------------------------------------------------------------------------------
 # Final Stage
