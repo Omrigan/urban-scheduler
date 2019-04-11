@@ -20,12 +20,13 @@ RUN cargo build --release --target=x86_64-unknown-linux-musl
 
 #RUN rm -f target/x86_64-unknown-linux-musl/release/deps/usrust*
 
-COPY . .
+COPY src src
 
 RUN cargo test --release --target=x86_64-unknown-linux-musl
 
 RUN cargo build --release --target=x86_64-unknown-linux-musl
 
+RUN rm target/x86_64-unknown-linux-musl/release/usrust
 # ------------------------------------------------------------------------------
 # Final Stage
 # ------------------------------------------------------------------------------
