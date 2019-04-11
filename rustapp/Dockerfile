@@ -24,8 +24,7 @@ COPY . .
 
 RUN cargo test --release --target=x86_64-unknown-linux-musl
 
-RUN
-cargo build --release --target=x86_64-unknown-linux-musl
+RUN cargo build --release --target=x86_64-unknown-linux-musl
 
 # ------------------------------------------------------------------------------
 # Final Stage
