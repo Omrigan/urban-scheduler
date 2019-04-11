@@ -15,7 +15,6 @@ Urban Scheduler is able to substitute event placeholder with actual place, optim
 ## Underlying technologies
 The system is written in python, Rust and JavaScript. 
 
-We use 
 ## External service providers
 
 ### HERE
@@ -26,15 +25,19 @@ HERE.com is used for several tasks inside the application:
 
 
 ### OpenStreetMap
+Used as a source of places.
 
 OSRM is used for building routes between specific places. 
 
 ### Google Maps
-Used for some places data.
+
+Used as a source of places.
+
 ### Moscow Open Data
+Used as a source of places.
 
 ## Algorithm
 
 The system is able to solve the optimization problem called "POGTSP" - Partial-Ordered Generalized Travelling Salesman Problem.
 
-The optimization is performed through mixed algorithm: branch&bound and dynamic programming.
+The optimization is performed through mixed algorithm: branch&cut and dynamic programming.
