@@ -13,7 +13,7 @@ Urban Scheduler is able to substitute event placeholder with actual place, optim
 - Helsinki
 
 ## Underlying technologies
-The system is written in python, Rust and JavaScript. 
+The system is written in Python, Rust and JavaScript. 
 
 ## External service providers
 
