@@ -16,11 +16,11 @@ RUN echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main
 
 RUN cargo build --release --target=x86_64-unknown-linux-musl
 
-RUN rm -f target/x86_64-unknown-linux-musl/release/deps/usrust*
+#RUN rm -f target/x86_64-unknown-linux-musl/release/deps/usrust*
 
 COPY . .
 
-RUN cargo test --release
+RUN cargo test --release --target=x86_64-unknown-linux-musl
 
 RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl
 
