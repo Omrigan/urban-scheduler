@@ -1,0 +1,45 @@
+version: '3'
+
+services: {
+  osrm:{
+    image: osrm/osrm-backend,
+    command: osrm-routed --algorithm mld /data/moscow.osrm,
+    volumes: ["../../data/osrm:/data"],
+    expose: [5000]
+  },
+  mongo:{
+    image: mongo,
+    volumes:["../../data/mongo:/data/db"],
+    expose: [27017]
+  },
+  app: {
+    image: registry.urbanscheduler.ml/app:rc,
+    build: ../../app,
+    expose: [80],
+    depends_on: [mongo],
+    environment: {
+      VIRTUAL_HOST: api.rc.urbanscheduler.ml,
+      LETSENCRYPT_HOST: api.rc.urbanscheduler.ml
+    }
+  },
+  rustapp: {
+    image: registry.urbanscheduler.ml/rustapp:rc,
+    command: /usr/local/bin/usrust,
+    build: ../../rustapp,
+  },
+  front: {
+    image: registry.urbanscheduler.ml/front:rc,
+    build: ../../front,
+    expose: [80],
+    environment: {
+        VIRTUAL_HOST: rc.urbanscheduler.ml,
+        LETSENCRYPT_HOST: rc.urbanscheduler.ml
+    }
+  },
+}
+networks:
+  default:
+    external:
+      name: webproxy
+
+
