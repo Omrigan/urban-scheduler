@@ -13,4 +13,4 @@ print(final_cmd)
 
 # call(final_cmd, shell=True)
 
-call("cd ../deploy/ && ./preprocess-osrm-final.sh", shell=True)
+call("cd ../deploy/ && ./preprocess-osrm.sh", shell=True)

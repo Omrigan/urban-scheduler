@@ -9,7 +9,9 @@ services: {
   },
   mongo:{
     image: mongo,
-    volumes:["../../data/mongo:/data/db"],
+    volumes:["../../data/mongo:/data/db",
+             "../../data/mongo_backups:/mongo_backups",
+             "../../data_raw/mongo_ready:/mongo_ready:ro"],
     expose: [27017]
   },
   app: {

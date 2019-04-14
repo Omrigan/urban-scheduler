@@ -8,6 +8,6 @@ python process/processor.py --city moscow --fr /data_raw/markets.json --provider
 python process/processor.py --city moscow --fr /data_raw/parks.json --provider mos --cat park
 python process/processor.py --city moscow --fr /data_raw/osm-files/moscow-nodes.osm --provider osm
 
-python process/processor.py --city helsinki --fr /data/data_raw/osm-files/helsinki-nodes.osm --provider osm
+python process/processor.py --city helsinki --fr /data_raw/osm-files/helsinki-nodes.osm --provider osm
 
 python process/post_processor.py

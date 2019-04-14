@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-docker run --rm --link mongodb:mongo -v "/mongo-backup:/backup" mongo \
- bash -c ‘mongodump --out /backup --host mongo:27017’
+cd dev
+docker-compose exec mongo bash -c "mongodump -d cityday --out /mongo_backups/$@"
