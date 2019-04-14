@@ -16,6 +16,7 @@ services: {
     image: registry.urbanscheduler.ml/app,
     build: ../../app,
     expose: [80],
+    depends_on: [mongo],
     environment: {
       VIRTUAL_HOST: api.urbanscheduler.ml,
       LETSENCRYPT_HOST: api.urbanscheduler.ml
