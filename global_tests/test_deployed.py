@@ -16,6 +16,6 @@ class TC(TestCase):
                 {"type": "fixed_place"},
             ]
         }
-        resp = post(DOMAIN + '/predict', sample)
+        resp = post(DOMAIN + '/predict', json=sample)
         self.assertEqual(resp.status_code, 400, resp.json())
 
