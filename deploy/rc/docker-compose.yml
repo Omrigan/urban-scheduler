@@ -34,7 +34,10 @@ services: {
   },
   front: {
     image: "registry.urbanscheduler.ml/front:rc",
-    build: ../../front,
+    build:{
+     context: ../../front,
+     dockerfile: Dockerfile-rc
+    },
     expose: [80],
     environment: {
       VIRTUAL_HOST: rc.urbanscheduler.ml,
