@@ -25,5 +25,5 @@ if __name__=="__main__":
     for k in ["park", "restaurant"]:
         all_places.extend(get_data_by_keyword(k))
 
-    with open('raw_data/small_raw.json', 'w') as f:
+    with open('data_raw/small_raw.json', 'w') as f:
         f.write(pretty_json(all_places))

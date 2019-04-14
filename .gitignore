@@ -1,6 +1,7 @@
 .idea
 __pycache__
 data/
+data_raw/
 osrm/
 deploy/dev/.env
 deploy/prod/.env

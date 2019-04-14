@@ -8,10 +8,10 @@ city = cities[target_city]
 
 FROM_NAME = "finland-latest.osm.pbf"
 
-from_file = "../data/osm-files/%s" % FROM_NAME
+from_file = "../data_raw/osm-files/%s" % FROM_NAME
 
-city_file = "../data/osm-files/%s.osm.pbf" % target_city
-nodes_file = "../data/osm-files/%s-nodes.osm" % target_city
+city_file = "../data_raw/osm-files/%s.osm.pbf" % target_city
+nodes_file = "../data_raw/osm-files/%s-nodes.osm" % target_city
 
 bbox_str = " ".join("%s=%s" % pair for pair in city["bbox"].items())
 

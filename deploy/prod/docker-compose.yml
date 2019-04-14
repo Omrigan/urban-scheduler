@@ -20,7 +20,10 @@ services: {
     environment: {
       VIRTUAL_HOST: api.urbanscheduler.ml,
       LETSENCRYPT_HOST: api.urbanscheduler.ml
-    }
+    },
+    volumes: [
+      "../../data_raw:/data_raw:ro",
+    ],
   },
   rustapp: {
     image: registry.urbanscheduler.ml/rustapp,
@@ -32,8 +35,8 @@ services: {
     build: ../../front,
     expose: [80],
     environment: {
-        VIRTUAL_HOST: urbanscheduler.ml,
-        LETSENCRYPT_HOST: urbanscheduler.ml
+      VIRTUAL_HOST: urbanscheduler.ml,
+      LETSENCRYPT_HOST: urbanscheduler.ml
     }
   },
 }

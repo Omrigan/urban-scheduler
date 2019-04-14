@@ -17,8 +17,7 @@ services: {
     build: ../../app,
     volumes: [
       "../../app:/app",
-      "../../data/raw_data:/data/raw_data",
-      "../../data/osm-files:/data/osm-files"
+      "../../data_raw:/data_raw:ro",
     ],
     command: /start-dev.sh,
     ports: ["89:80"]
