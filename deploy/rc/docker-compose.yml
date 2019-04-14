@@ -13,7 +13,7 @@ services: {
     expose: [27017]
   },
   app: {
-    image: registry.urbanscheduler.ml/app:rc,
+    image: "registry.urbanscheduler.ml/app:rc",
     build: ../../app,
     expose: [80],
     depends_on: [mongo],
@@ -26,12 +26,11 @@ services: {
     ],
   },
   rustapp: {
-    image: registry.urbanscheduler.ml/rustapp:rc,
-    command: /usr/local/bin/usrust,
+    image: "registry.urbanscheduler.ml/rustapp:rc",
     build: ../../rustapp,
   },
   front: {
-    image: registry.urbanscheduler.ml/front:rc,
+    image: "registry.urbanscheduler.ml/front:rc",
     build: ../../front,
     expose: [80],
     environment: {
