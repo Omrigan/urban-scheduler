@@ -22,7 +22,7 @@ steps:
     image: appleboy/drone-ssh
     settings:
       host: rc.urbanscheduler.ml
-      username: omrigan
+      username: cloud-user
       port: 22
       ssh_key:
         from_secret: ssh_key
