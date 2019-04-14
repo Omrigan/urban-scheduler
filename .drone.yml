@@ -2,7 +2,7 @@ kind: pipeline
 name: default
 
 steps:
-  - name: build
+  - name: build-rc
     image: docker/compose:1.24.0
     commands:
       - cd deploy/rc
@@ -17,6 +17,9 @@ steps:
         from_secret: registry_username
       PASSWORD:
         from_secret: registry_password
+    when:
+      branch: rc
+      event: push
 
   - name: deploy-rc
     image: appleboy/drone-ssh
@@ -31,7 +34,7 @@ steps:
         - docker-compose pull
         - docker-compose up -d
     when:
-      branch: master
+      branch: rc
       event: push
 
   - name: global-tests
@@ -39,6 +42,9 @@ steps:
     commands:
       - cd global_tests
       - python -m unittest
+    when:
+      branch: rc
+      event: push
 
   - name: deploy-prod
     image: appleboy/drone-ssh
