@@ -4,14 +4,15 @@ services: {
   osrm:{
     image: osrm/osrm-backend,
     command: osrm-routed --algorithm mld /data/moscow.osrm,
-    volumes: ["../../data/osrm:/data"],
+    volumes: ["../../data/osrm:/data",
+              "../../data_raw/osm-files/osrm-final.osm.pbf:/data/osrm-final.osm.pbf:ro"],
     expose: [5000]
   },
   mongo:{
     image: mongo,
     volumes:["../../data/mongo:/data/db",
              "../../data/mongo_backups:/mongo_backups",
-              "../../data_raw/mongo_ready:/mongo_ready:ro"],
+             "../../data_raw/mongo_ready:/mongo_ready:ro"],
     expose: [27017]
   },
   app: {
