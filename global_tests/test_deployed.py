@@ -1,7 +1,7 @@
 from unittest import TestCase
 from requests import get, post
 
-DOMAIN = "https://rc.urbanscheduler.ml"
+DOMAIN = "https://api.rc.urbanscheduler.ml"
 
 
 class TC(TestCase):
