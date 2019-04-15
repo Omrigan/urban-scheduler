@@ -3,7 +3,7 @@ version: '3.4'
 services: {
   osrm:{
     image: osrm/osrm-backend,
-    command: osrm-routed --algorithm mld /data/moscow.osrm,
+    command: osrm-routed --algorithm mld /data/osrm-final.osrm,
     volumes: ["../../data/osrm:/data",
               "../../data_raw/osm-files/osrm-final.osm.pbf:/data/osrm-final.osm.pbf:ro"],
     ports: ["5000:5000"]
