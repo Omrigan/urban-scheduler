@@ -40,10 +40,30 @@ steps:
   - name: global-tests
     image: registry.urbanscheduler.ml/app:rc
     commands:
+      - sleep 5 # Wait while certs are renewed
       - cd global_tests
       - python -m unittest
     when:
       branch: rc
+      event: push
+
+  - name: build-prod
+    image: docker/compose:1.24.0
+    commands:
+      - cd deploy/prod
+      - echo  $PASSWORD | docker login -u $USERNAME --password-stdin registry.urbanscheduler.ml
+      - docker-compose build
+      - docker-compose push
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    environment:
+      USERNAME:
+        from_secret: registry_username
+      PASSWORD:
+        from_secret: registry_password
+    when:
+      branch: master
       event: push
 
   - name: deploy-prod
