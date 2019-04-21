@@ -30,7 +30,10 @@ services: {
   },
   rustapp: {
     image: registry.urbanscheduler.ml/rustapp,
-    build: ../../rustapp,
+    build: {
+      context: ../../rustapp,
+      args: ["HERE_APP_CODE", "HERE_APP_ID"]
+    },
     env_file: [.env.private]
   },
   front: {
