@@ -6,6 +6,7 @@ steps:
     image: docker/compose:1.24.0
     commands:
       - cd deploy/rc
+      - touch .env.private
       - echo  $PASSWORD | docker login -u $USERNAME --password-stdin registry.urbanscheduler.ml
       - docker-compose build
       - docker-compose push
@@ -84,6 +85,7 @@ steps:
         from_secret: ssh_key
       script:
         - cd ~/urban-scheduler/deploy/prod
+        - touch .env.private
         - docker-compose pull
         - docker-compose up -d
     when:
