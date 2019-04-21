@@ -71,7 +71,7 @@ class TC(TestCase):
         stages = p.report()['stages']
         finished = stages[-1]
         self.assertEqual(finished[0], 'finished')
-        self.assertLess(finished[1], 5000)  # 5 seconds
+        self.assertLess(finished[1], 10000)  # 10 seconds
 
     def test_params(self):
         resp = get("http://127.0.0.1:80/get_params")

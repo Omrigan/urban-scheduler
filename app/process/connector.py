@@ -4,12 +4,20 @@ from collections import defaultdict, Counter
 import re
 from lib import *
 import pymongo
-
+import time
 from pymongo import MongoClient
 
 
 def get_db():
-    client = MongoClient('mongo', 27017)
+    while True:
+        try:
+            client = MongoClient('mongo', 27017)
+            info = client.server_info()  # Forces a call.
+            break
+        except ServerSelectionTimeoutError:
+            print("server is down.")
+            time.sleep(5)
+
     db = client.cityday
     return db
 
