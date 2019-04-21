@@ -59,7 +59,6 @@ pub fn calculate_route_here(points: &[MyPoint], route_attributes: &str) -> serde
     ?app_id={}&app_code={}&{}&mode=fastest;car;traffic:disabled&routeAttributes={}",
                           here_app_id, here_app_code, waypoint_part.join("&"), route_attributes);
     let url = reqwest::Url::parse(&url_str).unwrap();
-    println!("{:#}", url);
     let client = reqwest::Client::new();
     let response = client.get(url).header("Referer", "https://urbanscheduler.ml").send();
     let result: serde_json::Value = response.unwrap().json().unwrap();
@@ -70,10 +69,8 @@ pub fn calculate_route_here(points: &[MyPoint], route_attributes: &str) -> serde
 fn calculate_distance_here(p1: MyPoint, p2: MyPoint) -> Distance {
     let route = calculate_route_here(&[p1, p2], SUMMARY);
     let obj = route.as_object().unwrap();
-    println!("{:#?}", obj.keys().collect::<Vec<&String>>());
     let travel_time = route["summary"]["travelTime"].as_f64().unwrap();
 
-    println!("{:?}", travel_time);
     travel_time
 }
 

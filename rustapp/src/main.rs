@@ -62,7 +62,6 @@ mod tests {
 
         assert_eq!(response.status(), Status::Ok);
         let response_text = response.body().unwrap().into_string().unwrap();
-        println!("{:?}", response_text);
-//        assert_eq!(response_text, r#"{\"schedule\":[{\"coords\":[1.0,2.0],\"idx\":0}]}"#);
+
     }
 }

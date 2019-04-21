@@ -45,7 +45,7 @@ steps:
   - name: global-tests
     image: registry.urbanscheduler.ml/app:rc
     commands:
-      - sleep 5 # Wait while certs are renewed
+      - sleep 30 # Wait while certs are renewed
       - cd global_tests
       - python -m unittest
     when:

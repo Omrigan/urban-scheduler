@@ -13,13 +13,6 @@ L.Icon.Default.mergeOptions({
 
 export default class CoordinatesSelector extends Component<> {
 
-    // handleLocationFound = (e) => {
-    //
-    //     console.log({
-    //         hasLocation: true,
-    //         latlng: e.latlng,
-    //     })
-    // };
 
 
     handleClick = (e) => {

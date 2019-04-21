@@ -9,7 +9,6 @@ const SHAPE: &str = "shape";
 //}
 pub fn get_full_route(schedule: &Vec<MyPoint>) -> Option<Vec<(f64, f64)>> {
     let route = calculate_route_here(schedule, SHAPE);
-    println!("{:#}", route["shape"]);
     let arr = route["shape"].as_array()?;
     let it = arr.iter().map(|value|
         scan_fmt!(value.as_str().unwrap(),"{},{}", f64, f64)).map(|(x, y)| (x.unwrap(), y.unwrap()));

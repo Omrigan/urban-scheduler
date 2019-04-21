@@ -68,7 +68,6 @@ export class Job extends Component {
 
     };
     onChangeConfig = (newConfig) => {
-        console.log(newConfig);
         this.setState((state) =>
             ({config: update(state.config, {$merge: newConfig})}))
     };

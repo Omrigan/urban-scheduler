@@ -227,8 +227,6 @@ mod tests {
     fn test_serialize() {
         let p = get_sample_problem();
         let serialized = serde_json::to_string(&p).unwrap();
-//        println!("serialized = {}", serialized);
         assert_eq!(serialized, r#"{"ordered_events":[{"idx":0,"points":[{"coords":[1.0,2.0],"idx":0}]}],"config":{"dists_method":"dummy","solve_algorithm":"ordered"}}"#);
-//        assert_eq!(s.schedule.len(), p.ordered_events.len());
     }
 }
