@@ -37,7 +37,12 @@ export class Job extends Component {
                 key: 'moscow',
                 value: 'moscow'
             }],
-            citiesRaw: [],
+            citiesRaw: {
+                moscow: {
+                    radius: 20000,
+                    center: [55.7494539, 37.62160470000001]
+                },
+            },
         };
 
         getOptions((options) => {
