@@ -38,7 +38,7 @@ steps:
         - cd ~/urban-scheduler/deploy/rc
         - docker-compose pull
         - docker-compose up -d
-        - docker-compose exec app bash -c "python -m unittest tests.test"
+        - docker-compose exec -T app bash -c "python -m unittest tests.test"
     when:
       branch: rc
       event: push
