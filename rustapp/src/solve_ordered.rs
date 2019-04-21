@@ -6,6 +6,7 @@ use serde::{Serialize, Deserialize};
 
 use crate::distances::{DistsMethod, DistanceMatrix, calculate_distance};
 use crate::events::{MyPoint, Event};
+use crate::final_route::{get_full_route};
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -40,7 +41,8 @@ pub struct Problem {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Solution {
-    schedule: Vec<MyPoint>
+    schedule: Vec<MyPoint>,
+    full_route: Option<Vec<(f64, f64)>>
 }
 
 type AnswersMatrix = DMatrix<usize>;
@@ -107,7 +109,8 @@ fn sample_any(event: &Event) -> &MyPoint {
 
 pub fn solve_ordered(p: &Problem) -> Solution {
     let mut result = Solution {
-        schedule: Vec::with_capacity(p.ordered_events.len())
+        schedule: Vec::with_capacity(p.ordered_events.len()),
+        full_route: None
     };
     if p.ordered_events.len() == 0 {
         return result;
@@ -159,18 +162,22 @@ pub fn solve_ordered(p: &Problem) -> Solution {
         result.schedule.push(p.ordered_events[idx].points[*schedule_item].clone());
     }
 
+    result.full_route = get_full_route(&result.schedule);
+
     result
 }
 
 
 pub fn solve_stupid(p: &Problem) -> Solution {
-    let mut result = Solution {
-        schedule: Vec::with_capacity(p.ordered_events.len())
-    };
+    let mut schedule = Vec::with_capacity(p.ordered_events.len());
+
     for event in p.ordered_events.iter() {
-        result.schedule.push(event.points[0].clone());
+        schedule.push(event.points[0].clone());
     }
-    result
+    Solution {
+        full_route: get_full_route(&schedule),
+        schedule
+    }
 }
 
 

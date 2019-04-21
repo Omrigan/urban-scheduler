@@ -1,114 +1,67 @@
-
 import React, {Component} from 'react';
 import '../App.css';
 import ListOfMarkers from './ListOfMarkers';
 import ResultItemsList from './ResultItem';
 
-import Report from './Report';
+// import HEREMap from 'react-here-maps'
+import {Helmet} from "react-helmet";
+// import '../vendor/mapsjs-core'
+// import './vendor/mapsjs-service.js'
 
 
-export class Result extends Component {
-
+export default class ResultMap extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {}
+    }
 
     render() {
-        return (<div>
-            <Report report={this.props.result.report}/>
+        return (<React.Fragment>
+            <div id="here-map" style={{width: '100%', height: '400px', background: 'grey'}}/>
 
-            <ResultItemsList schedule={this.props.result.schedule}/>
+        </React.Fragment>)
+    }
 
-            <ListOfMarkers schedule={this.props.result.schedule}
-                           center={this.props.result.center}/>
-        </div>)
+    componentDidMount() {
+        const H = window.H;
+        const platform = new window.H.service.Platform({
+            'app_id': '3EGBDtqCF3N9erbelSMM',
+            'app_code': '7V_TmzxmRlBwas7-o5zizw'
+        });
+
+        const layer = platform.createDefaultLayers();
+        const container = document.getElementById('here-map');
+
+
+        const map = new window.H.Map(container, layer.normal.map, {
+            center: {lat: this.props.center[0], lng: this.props.center[1]},
+            zoom: 12,
+        });
+        this.state.map = map;
+
+        const mapEvents = new H.mapevents.MapEvents(map);
+        const behavior = new H.mapevents.Behavior(mapEvents);
+
+        const markers = this.props.schedule.map(item => new H.map.Marker(item.location));
+        this.state.map.addObjects(markers);
+
+        const routeShape = this.props.final_route;
+
+        if (routeShape) {
+            let linestring = new H.geo.LineString();
+
+            routeShape.forEach(function (point) {
+                linestring.pushLatLngAlt(point[0], point[1]);
+            });
+
+            const routeLine = new H.map.Polyline(linestring, {
+                style: {lineWidth: 10},
+                arrows: {fillColor: 'white', frequency: 2, width: 0.8, length: 0.7}
+            });
+            this.state.map.addObject(routeLine);
+
+        }
+
+
     }
 }
-
-
-
-var targetElement = document.getElementById('mapContainer');
-
-// Get the default map types from the platform object:
-var defaultLayers = platform.createDefaultLayers();
-
-// Instantiate the map:
-var map = new H.Map(
-  document.getElementById('mapContainer'),
-  defaultLayers.normal.map,
-  {
-  zoom: 10,
-  center: { lat: 52.51, lng: 13.4 }
-  });
-
-// Create the parameters for the routing request:
-var routingParameters = {
-  // The routing mode:
-  'mode': 'fastest;car',
-  // The start point of the route:
-  'waypoint0': 'geo!50.1120423728813,8.68340740740811',
-  // The end point of the route:
-  'waypoint1': 'geo!52.5309916298853,13.3846220493377',
-  // To retrieve the shape of the route we choose the route
-  // representation mode 'display'
-  'representation': 'display'
-};
-
-// Define a callback function to process the routing response:
-var onResult = function(result) {
-  var route,
-    routeShape,
-    startPoint,
-    endPoint,
-    linestring;
-  if(result.response.route) {
-  // Pick the first route from the response:
-  route = result.response.route[0];
-  // Pick the route's shape:
-  routeShape = route.shape;
-
-  // Create a linestring to use as a point source for the route line
-  linestring = new H.geo.LineString();
-
-  // Push all the points in the shape into the linestring:
-  routeShape.forEach(function(point) {
-    var parts = point.split(',');
-    linestring.pushLatLngAlt(parts[0], parts[1]);
-  });
-
-  // Retrieve the mapped positions of the requested waypoints:
-  startPoint = route.waypoint[0].mappedPosition;
-  endPoint = route.waypoint[1].mappedPosition;
-
-  // Create a polyline to display the route:
-  var routeLine = new H.map.Polyline(linestring, {
-    style: { strokeColor: 'blue', lineWidth: 10 }
-  });
-
-  // Create a marker for the start point:
-  var startMarker = new H.map.Marker({
-    lat: startPoint.latitude,
-    lng: startPoint.longitude
-  });
-
-  // Create a marker for the end point:
-  var endMarker = new H.map.Marker({
-    lat: endPoint.latitude,
-    lng: endPoint.longitude
-  });
-
-  // Add the route polyline and the two markers to the map:
-  map.addObjects([routeLine, startMarker, endMarker]);
-
-  // Set the map's viewport to make the whole route visible:
-  map.setViewBounds(routeLine.getBounds());
-  }
-};
-
-// Get an instance of the routing service:
-var router = platform.getRoutingService();
-
-// Call calculateRoute() with the routing parameters,
-// the callback and an error callback function (called if a
-// communication error occurs):
-router.calculateRoute(routingParameters, onResult,
-  function(error) {
-    alert(error.message);
-  });

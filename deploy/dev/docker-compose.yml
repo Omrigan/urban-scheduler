@@ -30,11 +30,12 @@ services: {
     build: {
       context: ../../rustapp,
       target: "build",
+      args: ["HERE_APP_CODE", "HERE_APP_ID"]
     },
     env_file: [.env.private],
     ports: ["90:80"],
-    volumes: ["../../rustapp:/rustapp"],
-    command: /rustapp/restart-on-filechange.sh
+    volumes: ["../../rustapp:/usr/src/usrust"],
+    command: ./restart-on-filechange.sh
   },
   front: {
     image: "registry.urbanscheduler.ml/front:dev",

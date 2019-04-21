@@ -45,7 +45,8 @@ def predict():
     result = {
         "schedule": schedule,
         "center": job.center(),
-        "report": job.report()
+        "report": job.report(),
+        "final_route": job.final_route
     }
     return jsonify(result)
 

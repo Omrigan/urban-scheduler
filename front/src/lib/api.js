@@ -1,6 +1,7 @@
 import axios from "axios";
 import {BACKEND_URL} from './settings'
 import React from 'react';
+import update from 'immutability-helper';
 
 const fetchCallback = (setState, result) => {
     const categoriesList = result.data.map((x, i) =>
@@ -45,9 +46,9 @@ export const getCities = (setState) => {
                 key: city,
                 value: city
             }));
-        console.log(cityOptions2);
 
-        setState(() => ({cities: cityOptions2, citiesRaw: result.data}));
+        setState({cities: cityOptions2, citiesRaw: result.data});
+        // setState((oldState) => (update(oldState, {cities: cityOptions2, citiesRaw: result.data, config: {city: "moscow"}})));
     });
 };
 

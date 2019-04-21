@@ -9,7 +9,7 @@ pub struct Event {
     pub points: Vec<MyPoint>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct MyPoint {
     pub coords: (f64, f64),
     pub idx: u64,

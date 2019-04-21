@@ -3,6 +3,10 @@
 #[macro_use]
 extern crate rocket;
 
+
+#[macro_use]
+extern crate scan_fmt;
+
 use rocket_contrib::json::{Json};
 use rocket::Rocket;
 
@@ -12,6 +16,7 @@ use rocket::config::{Config, Environment};
 mod solve_ordered;
 mod distances;
 mod events;
+mod final_route;
 
 #[post("/predict_raw", format = "json", data = "<problem_raw>")]
 fn predict_raw(problem_raw: Json<Problem>) -> Json<Solution> {

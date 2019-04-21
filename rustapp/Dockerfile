@@ -8,9 +8,15 @@ FROM clux/muslrust as build
 
 WORKDIR /usr/src/usrust
 
+ARG HERE_APP_CODE
+
+ARG HERE_APP_ID
+
 COPY Cargo.toml Cargo.toml
 
 COPY Cargo.lock Cargo.lock
+
+RUN export RUSTFLAGS=-Clinker=musl-gcc
 
 RUN mkdir src/
 
@@ -18,13 +24,12 @@ RUN echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main
 
 RUN cargo build --release --target=x86_64-unknown-linux-musl
 
-#RUN rm -f target/x86_64-unknown-linux-musl/release/deps/usrust*
+RUN rm -f target/x86_64-unknown-linux-musl/release/deps/usrust*
 
 COPY src src
 
 RUN cargo test --release --target=x86_64-unknown-linux-musl
 
-RUN rm target/x86_64-unknown-linux-musl/release/usrust
 
 RUN cargo build --release --target=x86_64-unknown-linux-musl
 

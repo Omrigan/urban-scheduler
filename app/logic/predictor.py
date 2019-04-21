@@ -68,6 +68,7 @@ class Predictor:
         self.numbers_of_candidates = []
         self.start_time = None
         self.finish_time = None
+        self.final_route = None
 
     def start(self):
         self.start_time = datetime.datetime.now()
@@ -158,6 +159,8 @@ class Predictor:
         self.checkpoint("rust_data_prepared")
         result = requests.post(RUST_URL, json={"ordered_events": rust_events,
                                                "config": self.config}).json()
+        print( result.get('full_route'), flush=True)
+        self.final_route = result.get('full_route')
         self.checkpoint("rust_completed")
         answer = []
         for dct, point in zip(events_int_to_mongo, result['schedule']):

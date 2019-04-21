@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import '../App.css';
 import ListOfMarkers from './ListOfMarkers';
+import ResultMap from './ResultMap'
 import ResultItemsList from './ResultItem';
 
 import Report from './Report';
@@ -15,7 +16,8 @@ export class Result extends Component {
 
             <ResultItemsList schedule={this.props.result.schedule}/>
 
-            <ListOfMarkers schedule={this.props.result.schedule}
+            <ResultMap schedule={this.props.result.schedule}
+                       final_route={this.props.result.final_route}
                            center={this.props.result.center}/>
         </div>)
     }
