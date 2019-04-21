@@ -13,8 +13,13 @@ parser = argparse.ArgumentParser(description='tbd')
 db = connector.get_db()
 
 
+parser.add_argument('--city', type=str,
+                    help='City', required=True)
+
+args = parser.parse_args()
+
 def insert_all(cats):
-    collection = db.categories
+    collection = db['categories_' + args.city]
     collection.delete_many({})
     collection.insert_many(cats)
 
@@ -26,7 +31,7 @@ categories = defaultdict(lambda: {
 
 places = db.places
 
-for place in places.find():
+for place in places.find({'city': args.city}):
     for cat in place["categories"]:
         categories[cat]["brands"].add(place['brand'])
         if "additional_fields" not in place:

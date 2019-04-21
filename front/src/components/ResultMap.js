@@ -25,8 +25,9 @@ export default class ResultMap extends Component {
     componentDidMount() {
         const H = window.H;
         const platform = new window.H.service.Platform({
-            'app_id': '3EGBDtqCF3N9erbelSMM',
-            'app_code': '7V_TmzxmRlBwas7-o5zizw'
+            app_id: '3EGBDtqCF3N9erbelSMM',
+            app_code: '7V_TmzxmRlBwas7-o5zizw',
+            useHTTPS: true
         });
 
         const layer = platform.createDefaultLayers();
