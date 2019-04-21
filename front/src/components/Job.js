@@ -29,10 +29,14 @@ export class Job extends Component {
             config: {
                 routingBackend: "dummy",
                 clipping: null,
-                solver: "python",
-                // city: "moscow"
+                solver: "rust",
+                city: "moscow"
             },
-            cities: [],
+            cities: [{
+                text: 'moscow',
+                key: 'moscow',
+                value: 'moscow'
+            }],
             citiesRaw: [],
         };
 

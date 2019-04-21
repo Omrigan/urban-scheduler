@@ -58,6 +58,7 @@ steps:
     commands:
       - cd deploy/prod
       - echo  $PASSWORD | docker login -u $USERNAME --password-stdin registry.urbanscheduler.ml
+      - touch .env.private
       - docker-compose build
       - docker-compose push
     volumes:
@@ -86,7 +87,6 @@ steps:
         from_secret: ssh_key
       script:
         - cd ~/urban-scheduler/deploy/prod
-        - touch .env.private
         - docker-compose pull
         - docker-compose up -d
     when:
