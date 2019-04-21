@@ -51,14 +51,18 @@ export class Job extends Component {
     }
 
 
-    eventChanged = (key, newContent) => {
+    eventChanged = (key, newContent, erase) => {
         // this.setState({
         //     eventStates: this.state.eventStates.map((x, i) =>
         //         (i === key ? Object.assign(x, newContent) : x))
         // });
         this.setState((state) => {
             const myobj = {};
-            myobj[key] = {$merge: newContent};
+            if (erase) {
+                myobj[key] = {$set: newContent};
+            } else {
+                myobj[key] = {$merge: newContent};
+            }
 
             return update(state, {
                 eventStates: myobj
@@ -122,9 +126,9 @@ export class Job extends Component {
     };
 
     getCenter = () => {
-        if(this.state.config.city){
+        if (this.state.config.city) {
             return this.state.citiesRaw[this.state.config.city].center
-        } else{
+        } else {
             return ([0, 0])
         }
     };

@@ -38,6 +38,7 @@ steps:
         - cd ~/urban-scheduler/deploy/rc
         - docker-compose pull
         - docker-compose up -d
+        - docker-compose exec app python -m unittest tests.test
     when:
       branch: rc
       event: push

@@ -28,7 +28,7 @@ def normalize_config(config):
     if config is None:
         config = {}
     result = {}
-    city = config.get("city")
+    city = config.get("city", "moscow")
     if city not in cities:
         raise InvalidCity(city)
 

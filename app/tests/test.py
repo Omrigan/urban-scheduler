@@ -46,7 +46,7 @@ class TC(TestCase):
         self.assertEqual(resp.get('error_code'), exception.code, resp)
 
     def test_predict_ordered(self):
-        p = Predictor()
+        p = Predictor({'city': 'moscow'})
         prediction = p.predict_ordered(sample_ordered)
         self.assertEqual(prediction[0], sample_ordered[0])
         self.assertEqual(prediction[1]['brand'], "даблби")
@@ -61,12 +61,12 @@ class TC(TestCase):
                 {"type": "fixed_place", "location": {"lat": 55.759499939832814, "lng": 37.64602661132813}},
                 {"type": None}]
         }
-        p = Predictor()
+        p = Predictor({'city': 'moscow'})
         prediction = p.predict_ordered(sample["ordered_events"])
         self.assertEqual(len(prediction), 4)
 
     def test_performance(self):
-        p = Predictor(dict(clipping=100))
+        p = Predictor(dict(clipping=100, city='moscow'))
         prediction = p.predict_ordered(sample_ordered)
         stages = p.report()['stages']
         finished = stages[-1]
@@ -82,16 +82,14 @@ class TC(TestCase):
         sample = {
             "ordered_events": [
                 {"type": "fixed_place"},
-            ]
+            ],
         }
         resp = request('/predict', sample)
         self._assert_exception(resp, InvalidEvent)
 
     def test_rust(self):
-        p = Predictor({"solver": "rust"})
+        p = Predictor({"solver": "rust", 'city': 'moscow'})
         prediction_rust = p.predict_ordered(sample_ordered)
-        print(p.report())
-        p = Predictor({"solver": "python"})
+        p = Predictor({"solver": "python", 'city': 'moscow'})
         prediction_python = p.predict_ordered(sample_ordered)
-        print(p.report())
         self.assertListEqual(prediction_python, prediction_rust)
