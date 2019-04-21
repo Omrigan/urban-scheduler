@@ -31,6 +31,7 @@ services: {
   rustapp: {
     image: registry.urbanscheduler.ml/rustapp,
     build: ../../rustapp,
+    env_file: [.env.private]
   },
   front: {
     image: registry.urbanscheduler.ml/front,

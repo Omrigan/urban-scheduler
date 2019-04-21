@@ -17,6 +17,10 @@ steps:
         from_secret: registry_username
       PASSWORD:
         from_secret: registry_password
+      HERE_APP_ID:
+        from_secret: HERE_APP_ID
+      HERE_APP_CODE:
+        from_secret: HERE_APP_CODE
     when:
       branch: rc
       event: push
@@ -62,6 +66,10 @@ steps:
         from_secret: registry_username
       PASSWORD:
         from_secret: registry_password
+      HERE_APP_ID:
+        from_secret: HERE_APP_ID
+      HERE_APP_CODE:
+        from_secret: HERE_APP_CODE
     when:
       branch: master
       event: push
