@@ -217,6 +217,7 @@ class Predictor:
             category = event.get('category')
             brand = event.get('brand')
             query = {"categories": category, "city": self.config['city']}
+            print("Query:", query, flush=True)
             if brand:
                 query['brand'] = brand
             result = list(places.find(query, {'location': 1}))
