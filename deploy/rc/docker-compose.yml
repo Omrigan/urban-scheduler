@@ -40,7 +40,11 @@ services: {
     image: "registry.urbanscheduler.ml/front:rc",
     build:{
       context: ../../front,
-      dockerfile: Dockerfile-rc
+      args: {
+        REACT_APP_ENV: "rc",
+        REACT_APP_TITLE: "RC Urban Scheduler",
+        REACT_APP_URL: "https://api.rc.urbanscheduler.ml"
+      }
     },
     expose: [80],
     environment: {
