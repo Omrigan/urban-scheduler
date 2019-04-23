@@ -7,7 +7,7 @@ import {loadResult} from "../lib/localstorageManager";
 
 const routingBackends = [
     {
-        text: "OSRM - car",
+        text: "Car (OSRM)",
         key: 1,
         value: "osrm"
     },
@@ -17,7 +17,7 @@ const routingBackends = [
         value: "dummy"
     },
     {
-        text: "Here",
+        text: "Public transport (HERE)",
         key: 3,
         value: "here"
     }

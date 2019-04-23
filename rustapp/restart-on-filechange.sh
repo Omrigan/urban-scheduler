@@ -13,8 +13,8 @@ sigint_handler()
 
 trap sigint_handler SIGINT
 
-cargo build --release --target=x86_64-unknown-linux-musl
 while true; do
+  cargo build --release --target=x86_64-unknown-linux-musl
   cargo run --release --target=x86_64-unknown-linux-musl &
   PID=$!
   sleep 5

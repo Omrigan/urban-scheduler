@@ -34,8 +34,12 @@ def normalize_config(config):
 
     result["city"] = city
     result['dists_method'] = config.get('routingBackend') or 'dummy'
-    result["clipping"] = int(config.get('clipping') or 50)
     result["solver"] = config.get("solver") or "python"
+    default_clipping = 500 if result["solver"]=='rust' else 50
+    result["clipping"] = int(config.get('clipping') or default_clipping)
+    if result["dists_method"]=='here':
+        result["clipping"] = min(result["clipping"], 5)
+
     return result
 
 

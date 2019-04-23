@@ -21,7 +21,7 @@ mod final_route;
 #[post("/predict_raw", format = "json", data = "<problem_raw>")]
 fn predict_raw(problem_raw: Json<Problem>) -> Json<Solution> {
     let problem = problem_raw;
-    println!("{:?}", problem);
+//    println!("{:?}", problem);
     let solution = solve_ordered(&problem);
     Json(solution)
 }

@@ -24,10 +24,10 @@ mod tests {
     fn test_final_route() {
         let schedule = vec![MyPoint {
             idx: 0,
-            coords: (60.2243802, 25.0291695),
+            coords:  (55.72271,37.58721),
         }, MyPoint {
             idx: 0,
-            coords: (60.7243802, 25.0291695),
+            coords: (55.72481,37.7009),
         }];
 
 

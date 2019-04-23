@@ -45,7 +45,7 @@ services: {
     },
     ports: ["80:80"],
     volumes: ["../../front:/front"],
-#    command: npm start
+    command: npm start
   },
 }
 

@@ -56,13 +56,16 @@ pub fn calculate_route_here(points: &[MyPoint], route_attributes: &str) -> serde
         |(i, p)| format!("waypoint{}=geo!{}", i, p.get_string_repr())).collect();
 
     let url_str = format!("https://route.api.here.com/routing/7.2/calculateroute.json\
-    ?app_id={}&app_code={}&{}&mode=fastest;car;traffic:disabled&routeAttributes={}",
+    ?app_id={}&app_code={}&{}&&transportMode=publicTransport&mode=fastest;publicTransport;traffic:disabled&routeAttributes={}",
                           here_app_id, here_app_code, waypoint_part.join("&"), route_attributes);
+//    let url_str = format!("https://route.api.here.com/routing/7.2/calculateroute.json?alternatives=0&app_code={}&app_id={}&departure=2017-09-19T09:00:00&jsonAttributes=41&language=en_GB&legattributes=all&linkattributes=none,sh,ds,rn,ro,nl,pt,ns,le,fl&maneuverattributes=all&metricSystem=metric&mode=fastest;publicTransport;traffic:disabled;&routeattributes=none,sh,wp,sm,bb,lg,no,li,tx,la&transportMode=publicTransport&walkSpeed=1.4&{}",
+//    here_app_code, here_app_id, waypoint_part.join("&"));
     let url = reqwest::Url::parse(&url_str).unwrap();
     let client = reqwest::Client::new();
     let response = client.get(url).header("Referer", "https://urbanscheduler.ml").send();
-    let result: serde_json::Value = response.unwrap().json().unwrap();
 
+    let result: serde_json::Value = response.unwrap().json().unwrap();
+    println!("{:#}", result);
     return result["response"]["route"][0].clone();
 }
 
@@ -104,14 +107,14 @@ mod tests {
     fn test_here() {
         let sample_point = MyPoint {
             idx: 0,
-            coords: (60.2243802, 25.0291695),
+            coords: (55.72271,37.58721),
         };
 
         let sample_point2 = MyPoint {
             idx: 0,
-            coords: (60.7243802, 25.0291695),
+            coords: (55.72481,37.7009),
         };
         let dist = calculate_distance_here(sample_point, sample_point2);
-        assert_eq!(dist, 4309.0);
+        assert_eq!(dist, 4672.0);
     }
 }
