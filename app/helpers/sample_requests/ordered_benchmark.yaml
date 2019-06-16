@@ -5,3 +5,7 @@ ordered_events:
     category: cafe
   - type: category
     category: restaurant
+config:
+  clipping: 100
+  city: 'moscow'
+  solver: 'rust'

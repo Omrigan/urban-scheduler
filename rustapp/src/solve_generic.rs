@@ -1,20 +1,17 @@
-fn insert_after(old_path: &mut Path, new_segment: Path) {}
+struct SearchTree<'a> {
+    root: Node<'a>,
 
-
-struct Path<'a> {
-    from_event: &'a Event,
-    to_event: &'a Event,
-    matrix: DistanceMatrix,
-//    middle_point:
 }
 
-struct PathList<'a> {
-    path: Path<'a>,
-    next_node: Box<PathList<'a>>,
+struct Node<'a> {
+    is_terminal: bool,
+    children: Vec<Node<'a>>,
+    parent: Option<&'a Node<'a>>
 }
 
+fn expand_node(node: &mut Node){
 
-
+}
 //fn squash<'a>(first: Path<'a>, second: Path<'a>) -> (Path<'a>, u64) {
 //    let mut result = Path{
 //        from_event: first.from_event,
