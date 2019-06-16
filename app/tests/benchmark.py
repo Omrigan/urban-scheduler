@@ -5,10 +5,12 @@ from logic.predictor import Predictor
 from exceptions import InvalidRequest, InvalidEvent
 import json
 from yaml import load
+import numpy as np
 
 
 def request(endpoint, data):
     return post("https://api.rc.urbanscheduler.ml" + endpoint, json=data).json()
+
 
 def get_ordered_problem():
     f = open('helpers/sample_requests/ordered_benchmark.yaml')
@@ -18,16 +20,23 @@ def get_ordered_problem():
 
 class TCPerformance(TestCase):
     def _measure(self, config):
-        ordered_events = get_ordered_problem()
-        sample = {
-            "ordered_events": ordered_events,
-            "config": config
-        }
+        sample = get_ordered_problem()
+        sample["config"] = config
         resp = request('/predict', sample)
         self.assertTrue('final_route' in resp)
         result_ms = resp['report']['stages'][-1][1]
         return result_ms
 
+    def _measure_batch(self, config, size, comment=None):
+        result = []
+        for i in range(size):
+            result.append(self._measure(config))
+        print("Config:", config)
+        if comment:
+            print("Comment:", comment)
+        print("Mean: %s. Std: %s" % (np.mean(result), np.std(result)))
+        print('Full results:', result)
+
     def test_ordered(self):
-        print("Python result:", self._measure({"solver": "python", 'clipping': 5, 'city': 'moscow'}))
-        print("Rust result:", self._measure({"solver": "rust", 'clipping': 5, 'city': 'moscow'}))
+        self._measure_batch({"solver": "python", 'clipping': 100, 'city': 'moscow'}, 10, "Python")
+        self._measure_batch({"solver": "rust", 'clipping': 100, 'city': 'moscow'}, 10, "Rust nalgebra")

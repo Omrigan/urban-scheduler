@@ -1,6 +1,6 @@
 ordered_events:
   - type: category
-    category: restaurant
+    category: park
   - type: category
     category: cafe
   - type: category

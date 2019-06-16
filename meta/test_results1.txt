@@ -1,0 +1,8 @@
+Config: {'solver': 'python', 'clipping': 100, 'city': 'moscow'}
+Comment: Python
+Mean: 6694.7. Std: 443.5037880334282
+Full results: [6546, 6515, 7887, 6200, 6709, 6926, 6408, 6684, 6363, 6709]
+Config: {'solver': 'rust', 'clipping': 100, 'city': 'moscow'}
+Comment: Rust nalgebra
+Mean: 717.0. Std: 147.34449429822615
+Full results: [876, 870, 502, 769, 860, 789, 512, 754, 494, 744]
