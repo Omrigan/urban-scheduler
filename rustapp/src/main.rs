@@ -17,7 +17,7 @@ mod solve_ordered;
 mod distances;
 mod events;
 mod final_route;
-mod test_performance;
+//mod test_performance;
 
 #[post("/predict_raw", format = "json", data = "<problem_raw>")]
 fn predict_raw(problem_raw: Json<OrderedProblem>) -> Json<Solution> {
