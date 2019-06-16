@@ -1,12 +1,12 @@
-use nalgebra::{Matrix, DMatrix, RowDVector};
-use nalgebra::base::{Scalar, Dim};
-use nalgebra::storage::Storage;
+use ndarray::{Array2, Array1};
+use ndarray_stats::QuantileExt;
+
 use rand::{thread_rng, seq::SliceRandom};
 use serde::{Serialize, Deserialize};
 
 use crate::distances::{DistsMethod, DistanceMatrix, calculate_distance};
 use crate::events::{MyPoint, Event};
-use crate::final_route::{get_full_route};
+use crate::final_route::get_full_route;
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -42,59 +42,21 @@ pub struct OrderedProblem {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Solution {
     schedule: Vec<MyPoint>,
-    full_route: Option<Vec<(f64, f64)>>
+    full_route: Option<Vec<(f64, f64)>>,
 }
 
-type AnswersMatrix = DMatrix<usize>;
-
-
-trait MatrixExt<N: Scalar + PartialOrd, R: Dim, C: Dim, S: Storage<N, R, C>> {
-    fn matrix_argmin(&self) -> (usize, usize);
-    fn matrix_argmax(&self) -> (usize, usize);
-}
-
-impl<N: Scalar + PartialOrd, R: Dim, C: Dim, S: Storage<N, R, C>> MatrixExt<N, R, C, S> for Matrix<N, R, C, S> {
-    fn matrix_argmin(&self) -> (usize, usize) {
-        let mut result_value = self.index((0, 0));
-        let mut result = (0usize, 0usize);
-        for pos_x in 0..self.nrows() {
-            for pos_y in 0..self.ncols() {
-                let value = self.index((pos_x, pos_y));
-                if value < result_value {
-                    result_value = value;
-                    result = (pos_x, pos_y);
-                }
-            }
-        }
-        result
-    }
-    fn matrix_argmax(&self) -> (usize, usize) {
-        let mut result_value = self.index((0, 0));
-        let mut result = (0usize, 0usize);
-        for pos_x in 0..self.nrows() {
-            for pos_y in 0..self.ncols() {
-                let value = self.index((pos_x, pos_y));
-                if value > result_value {
-                    result_value = value;
-                    result = (pos_x, pos_y);
-                }
-            }
-        }
-        result
-    }
-}
-
+type AnswersMatrix = Array2<usize>;
 
 fn squash_distances(first: DistanceMatrix, second: DistanceMatrix) -> (DistanceMatrix, AnswersMatrix) {
-    let result_shape = (first.shape().0, second.shape().1);
-    let mut result_dists = DistanceMatrix::zeros(result_shape.0, result_shape.1);
-    let mut result_answers = AnswersMatrix::zeros(result_shape.0, result_shape.1);
+    let result_shape = (first.shape()[0], second.shape()[1]);
+    let mut result_dists = DistanceMatrix::zeros(result_shape);
+    let mut result_answers = AnswersMatrix::zeros(result_shape);
     for i in 0..result_shape.0 {
         for j in 0..result_shape.1 {
-            let dists: RowDVector<f64> = first.row(i) + second.transpose().row(j);
-            let argmin = dists.matrix_argmin();
-            *result_answers.index_mut((i, j)) = argmin.1;
-            *result_dists.index_mut((i, j)) = dists.index(argmin).clone();
+            let dists: Array1<f64> = &first.row(i) + &second.column(j);
+            let argmin: usize = dists.argmin().unwrap();
+            result_answers[(i, j)] = argmin;
+            result_dists[(i, j)] = dists[argmin];
         }
     }
 
@@ -110,7 +72,7 @@ fn sample_any(event: &Event) -> &MyPoint {
 pub fn solve_ordered(p: &OrderedProblem) -> Solution {
     let mut result = Solution {
         schedule: Vec::with_capacity(p.ordered_events.len()),
-        full_route: None
+        full_route: None,
     };
     if p.ordered_events.len() == 0 {
         return result;
@@ -145,13 +107,13 @@ pub fn solve_ordered(p: &OrderedProblem) -> Solution {
 
     let current_dists_reverse_pass = current_dists.unwrap();
 
-    let (start, end) = current_dists_reverse_pass.matrix_argmin();
+    let (start, end) = current_dists_reverse_pass.argmin().unwrap();
     let mut reverted_schedule_idxs = vec![end];
 
     let mut current_point = end;
 
     for current_answer in answers.iter().rev() {
-        let prev_point = current_answer.index((start, current_point)).clone();
+        let prev_point = current_answer[(start, current_point)];
         reverted_schedule_idxs.push(prev_point.clone());
         current_point = prev_point;
     }
@@ -176,7 +138,7 @@ pub fn solve_stupid(p: &OrderedProblem) -> Solution {
     }
     Solution {
         full_route: get_full_route(&schedule),
-        schedule
+        schedule,
     }
 }
 

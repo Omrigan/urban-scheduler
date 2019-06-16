@@ -6,6 +6,7 @@ from exceptions import InvalidRequest, InvalidEvent
 import json
 
 from yaml import load
+
 sample_ordered = [
     {
         "type": "fixed_place",
@@ -100,7 +101,34 @@ class TC(TestCase):
         content = load(f)
         resp = request('/predict', content)
         print(resp['schedule'])
-        self.assertEqual(resp['schedule'], [{'additional_fields': {}, 'brand': 'музейный парк', 'categories': ['park', 'point_of_interest', 'establishment'], 'city': 'moscow', 'location': {'lat': 55.7589777, 'lng': 37.62769979999999}, 'name': 'Музейный парк'}, {'amenity': 'cafe', 'brand': 'шоколадница', 'categories': ['cafe'], 'city': 'moscow', 'contact:facebook': 'https://www.facebook.com/shoko.ru', 'contact:instagram': 'https://www.instagram.com/shoko.ru', 'contact:ok': 'https://ok.ru/shokoru', 'contact:twitter': 'https://twitter.com/wwwShokoRu', 'contact:vk': 'https://vk.com/shokoru', 'contact:website': 'http://shoko.ru', 'cuisine': 'coffee_shop', 'diet:vegetarian': 'no', 'location': {'lat': '55.757364', 'lng': '37.6316441'}, 'name': 'Шоколадница', 'name:en': 'Shokoladnitsa', 'name:ru': 'Шоколадница', 'opening_hours': '24/7', 'original_brand': 'Шоколадница', 'phone': '+7 985 310-46-32', 'wheelchair': 'no'}, {'additional_fields': {}, 'brand': 'ресторан "marea"', 'categories': ['restaurant', 'food', 'point_of_interest', 'establishment'], 'city': 'moscow', 'location': {'lat': 55.7566465, 'lng': 37.6323381}, 'name': 'Ресторан "Marea"'}]
-)
+        self.assertEqual(resp['schedule'], [{
+                                                'additional_fields': {}, 'brand': 'музейный парк',
+                                                'categories': ['park', 'point_of_interest', 'establishment'],
+                                                'city': 'moscow',
+                                                'location': {'lat': 55.7589777, 'lng': 37.62769979999999},
+                                                'name': 'Музейный парк'
+                                            }, {
+                                                'amenity': 'cafe', 'brand': 'шоколадница', 'categories': ['cafe'],
+                                                'city': 'moscow',
+                                                'contact:facebook': 'https://www.facebook.com/shoko.ru',
+                                                'contact:instagram': 'https://www.instagram.com/shoko.ru',
+                                                'contact:ok': 'https://ok.ru/shokoru',
+                                                'contact:twitter': 'https://twitter.com/wwwShokoRu',
+                                                'contact:vk': 'https://vk.com/shokoru',
+                                                'contact:website': 'http://shoko.ru', 'cuisine': 'coffee_shop',
+                                                'diet:vegetarian': 'no',
+                                                'location': {'lat': '55.757364', 'lng': '37.6316441'},
+                                                'name': 'Шоколадница', 'name:en': 'Shokoladnitsa',
+                                                'name:ru': 'Шоколадница', 'opening_hours': '24/7',
+                                                'original_brand': 'Шоколадница', 'phone': '+7 985 310-46-32',
+                                                'wheelchair': 'no'
+                                            }, {
+                                                'additional_fields': {}, 'brand': 'ресторан "marea"',
+                                                'categories': ['restaurant', 'food', 'point_of_interest',
+                                                               'establishment'], 'city': 'moscow',
+                                                'location': {'lat': 55.7566465, 'lng': 37.6323381},
+                                                'name': 'Ресторан "Marea"'
+                                            }]
+                         )
 
         # self.assertEqual('final_route' in resp)

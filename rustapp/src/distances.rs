@@ -1,7 +1,8 @@
 use serde::{Serialize, Deserialize};
 use geo::prelude::*;
 
-use nalgebra::DMatrix;
+//use nalgebra::DMatrix;
+use ndarray::Array2;
 use crate::events::MyPoint;
 
 use reqwest;
@@ -19,7 +20,7 @@ pub enum DistsMethod {
 
 
 pub type Distance = f64;
-pub type DistanceMatrix = DMatrix<Distance>;
+pub type DistanceMatrix = Array2<Distance>;
 
 use std::env;
 
@@ -79,10 +80,10 @@ fn calculate_distance_here(p1: MyPoint, p2: MyPoint) -> Distance {
 
 
 fn calculate_distance_matrix(f: &Fn(MyPoint, MyPoint) -> Distance, from: &Vec<MyPoint>, to: &Vec<MyPoint>) -> DistanceMatrix {
-    let mut result = DistanceMatrix::zeros(from.len(), to.len());
+    let mut result = DistanceMatrix::zeros((from.len(), to.len()));
     for (i, x) in from.iter().enumerate() {
         for (j, y) in to.iter().enumerate() {
-            *result.index_mut((i, j)) = f(*x, *y);
+            result[(i, j)]= f(*x, *y);
         }
     }
     result
