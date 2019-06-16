@@ -24,7 +24,7 @@ impl Default for SolveAlgorithm {
 }
 
 #[derive(Debug, Serialize, Deserialize, Default)]
-struct Config {
+pub struct Config {
     #[serde(default)]
     dists_method: DistsMethod,
     #[serde(default)]
@@ -33,7 +33,7 @@ struct Config {
 
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Problem {
+pub struct OrderedProblem {
     ordered_events: Vec<Event>,
     #[serde(default)]
     config: Config,
@@ -107,7 +107,7 @@ fn sample_any(event: &Event) -> &MyPoint {
     event.points.choose(&mut rng).unwrap()
 }
 
-pub fn solve_ordered(p: &Problem) -> Solution {
+pub fn solve_ordered(p: &OrderedProblem) -> Solution {
     let mut result = Solution {
         schedule: Vec::with_capacity(p.ordered_events.len()),
         full_route: None
@@ -168,7 +168,7 @@ pub fn solve_ordered(p: &Problem) -> Solution {
 }
 
 
-pub fn solve_stupid(p: &Problem) -> Solution {
+pub fn solve_stupid(p: &OrderedProblem) -> Solution {
     let mut schedule = Vec::with_capacity(p.ordered_events.len());
 
     for event in p.ordered_events.iter() {
@@ -186,7 +186,7 @@ mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
 
-    fn get_sample_problem() -> Problem {
+    fn get_sample_problem() -> OrderedProblem {
         let sample_point = MyPoint {
             idx: 0,
             coords: (1f64, 2f64),
@@ -195,7 +195,7 @@ mod tests {
             idx: 0,
             points: vec![sample_point],
         };
-        Problem {
+        OrderedProblem {
             ordered_events: vec![sample_event],
             config: Config::default(),
         }

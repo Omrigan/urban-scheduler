@@ -118,8 +118,9 @@ export class Job extends Component {
         let reader = new FileReader();
         reader.onload = (e) => {
             let contents = safeLoad(e.target.result);
+            console.log(contents);
             // Display file content
-            this.setState({eventStates: contents})
+            this.setState({eventStates: contents.ordered_events})
         };
         reader.readAsText(file);
     };

@@ -1,0 +1,7 @@
+ordered_events:
+  - type: category
+    category: restaurant
+  - type: category
+    category: cafe
+  - type: category
+    category: restaurant

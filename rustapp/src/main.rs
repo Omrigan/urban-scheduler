@@ -10,16 +10,17 @@ extern crate scan_fmt;
 use rocket_contrib::json::{Json};
 use rocket::Rocket;
 
-use crate::solve_ordered::{Problem, Solution, solve_ordered};
+use crate::solve_ordered::{OrderedProblem, Solution, solve_ordered};
 use rocket::config::{Config, Environment};
 
 mod solve_ordered;
 mod distances;
 mod events;
 mod final_route;
+mod test_performance;
 
 #[post("/predict_raw", format = "json", data = "<problem_raw>")]
-fn predict_raw(problem_raw: Json<Problem>) -> Json<Solution> {
+fn predict_raw(problem_raw: Json<OrderedProblem>) -> Json<Solution> {
     let problem = problem_raw;
 //    println!("{:?}", problem);
     let solution = solve_ordered(&problem);

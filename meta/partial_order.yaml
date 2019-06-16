@@ -1,0 +1,17 @@
+- type: sequential
+  items:
+  - type: category
+    category: cafe
+    brand: ''
+  - type: parallel
+    items:
+      - type: fixed_place
+        name: Home
+        location:
+          lat: 55.76419384832066
+          lng: 37.66508102416993
+      - type: fixed_place
+          name: Home2
+          location:
+            lat: 55.76419384832066
+            lng: 37.66508102416993

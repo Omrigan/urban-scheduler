@@ -9,3 +9,4 @@ deploy/prod/.env
 token.json
 rustapp/target
 .env.private
+venv
