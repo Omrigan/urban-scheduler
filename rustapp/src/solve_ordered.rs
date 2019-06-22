@@ -1,10 +1,10 @@
-use ndarray::{Array2, Array1};
-use ndarray_stats::QuantileExt;
 
 use rand::{thread_rng, seq::SliceRandom};
 use serde::{Serialize, Deserialize};
+use ndarray_stats::QuantileExt;
 
-use crate::distances::{DistsMethod, DistanceMatrix, calculate_distance};
+use crate::distances::{DistsMethod, DistanceMatrix, AnswersMatrix,
+                       calculate_distance, squash_distances};
 use crate::events::{MyPoint, Event};
 use crate::final_route::get_full_route;
 
@@ -14,6 +14,7 @@ use crate::final_route::get_full_route;
 enum SolveAlgorithm {
     Stupid,
     Ordered,
+    Generic
 }
 
 
@@ -26,9 +27,11 @@ impl Default for SolveAlgorithm {
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct Config {
     #[serde(default)]
-    dists_method: DistsMethod,
+    pub dists_method: DistsMethod,
     #[serde(default)]
     solve_algorithm: SolveAlgorithm,
+    #[serde(default)]
+    pub find_final_route: bool
 }
 
 
@@ -41,27 +44,11 @@ pub struct OrderedProblem {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Solution {
-    schedule: Vec<MyPoint>,
-    full_route: Option<Vec<(f64, f64)>>,
+    pub schedule: Vec<MyPoint>,
+    pub full_route: Option<Vec<(f64, f64)>>,
 }
 
-type AnswersMatrix = Array2<usize>;
 
-fn squash_distances(first: DistanceMatrix, second: DistanceMatrix) -> (DistanceMatrix, AnswersMatrix) {
-    let result_shape = (first.shape()[0], second.shape()[1]);
-    let mut result_dists = DistanceMatrix::zeros(result_shape);
-    let mut result_answers = AnswersMatrix::zeros(result_shape);
-    for i in 0..result_shape.0 {
-        for j in 0..result_shape.1 {
-            let dists: Array1<f64> = &first.row(i) + &second.column(j);
-            let argmin: usize = dists.argmin().unwrap();
-            result_answers[(i, j)] = argmin;
-            result_dists[(i, j)] = dists[argmin];
-        }
-    }
-
-    (result_dists, result_answers)
-}
 
 
 fn sample_any(event: &Event) -> &MyPoint {
@@ -93,7 +80,7 @@ pub fn solve_ordered(p: &OrderedProblem) -> Solution {
             current_dists = Some(match current_dists {
                 None => last_dists,
                 Some(prev_dists) => {
-                    let (new_dists, answer) = squash_distances(prev_dists, last_dists);
+                    let (new_dists, answer) = squash_distances(&prev_dists, &last_dists);
                     answers.push(answer);
                     new_dists
                 }

@@ -1,8 +1,9 @@
 use serde::{Serialize, Deserialize};
 use geo::prelude::*;
 
-//use nalgebra::DMatrix;
-use ndarray::Array2;
+use ndarray::{Array1, Array2};
+use ndarray_stats::QuantileExt;
+
 use crate::events::MyPoint;
 
 use reqwest;
@@ -21,6 +22,8 @@ pub enum DistsMethod {
 
 pub type Distance = f64;
 pub type DistanceMatrix = Array2<Distance>;
+pub type AnswersMatrix = Array2<usize>;
+
 
 use std::env;
 
@@ -98,6 +101,21 @@ pub fn calculate_distance(method: DistsMethod, from: &Vec<MyPoint>, to: &Vec<MyP
     }
 }
 
+pub fn squash_distances(first: &DistanceMatrix, second: &DistanceMatrix) -> (DistanceMatrix, AnswersMatrix) {
+    let result_shape = (first.shape()[0], second.shape()[1]);
+    let mut result_dists = DistanceMatrix::zeros(result_shape);
+    let mut result_answers = AnswersMatrix::zeros(result_shape);
+    for i in 0..result_shape.0 {
+        for j in 0..result_shape.1 {
+            let dists: Array1<f64> = &first.row(i) + &second.column(j);
+            let argmin: usize = dists.argmin().unwrap();
+            result_answers[(i, j)] = argmin;
+            result_dists[(i, j)] = dists[argmin];
+        }
+    }
+
+    (result_dists, result_answers)
+}
 
 #[cfg(test)]
 mod tests {

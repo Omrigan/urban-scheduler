@@ -14,6 +14,7 @@ use crate::solve_ordered::{OrderedProblem, Solution, solve_ordered};
 use rocket::config::{Config, Environment};
 
 mod solve_ordered;
+mod solve_generic;
 mod distances;
 mod events;
 mod final_route;
