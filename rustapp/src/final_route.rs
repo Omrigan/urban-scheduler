@@ -1,5 +1,4 @@
-use crate::distances::calculate_route_here;
-use crate::events::MyPoint;
+use crate::distances::{MyPoint, calculate_route_here};
 
 const SHAPE: &str = "shape";
 
@@ -32,7 +31,7 @@ mod tests {
 
 
         let full_route = get_full_route(&schedule).unwrap();
-//        println!("{:?}", full_route);
+        println!("{:?}", full_route);
 //        assert_eq!(0.0, 0.1);
     }
 }

@@ -2,29 +2,30 @@
 
 #[macro_use]
 extern crate rocket;
-
-
 #[macro_use]
 extern crate scan_fmt;
 
+
+use crate::problem::{PublicProblem, Solution, normalize_problem};
+use crate::solve_ordered::{solve_ordered};
+
 use rocket_contrib::json::{Json};
 use rocket::Rocket;
-
-use crate::solve_ordered::{OrderedProblem, Solution, solve_ordered};
 use rocket::config::{Config, Environment};
 
 mod solve_ordered;
 mod solve_generic;
 mod distances;
-mod events;
 mod final_route;
+mod problem;
 //mod test_performance;
 
 #[post("/predict_raw", format = "json", data = "<problem_raw>")]
-fn predict_raw(problem_raw: Json<OrderedProblem>) -> Json<Solution> {
+fn predict_raw(problem_raw: Json<PublicProblem>) -> Json<Solution> {
     let problem = problem_raw;
+    let normalized_problem = normalize_problem(problem.into_inner());
 //    println!("{:?}", problem);
-    let solution = solve_ordered(&problem);
+    let solution = solve_ordered(&normalized_problem);
     Json(solution)
 }
 

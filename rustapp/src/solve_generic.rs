@@ -1,33 +1,18 @@
 use crate::distances::{DistanceMatrix, AnswersMatrix, squash_distances, calculate_distance};
-use crate::final_route::get_full_route;
-use crate::solve_ordered::{Config, Solution};
-use crate::events::Event;
+use crate::problem::{Problem, Solution, Event, Config};
 
-use serde::{Serialize, Deserialize};
 use bit_set::BitSet;
 use ndarray_stats::QuantileExt;
 
 use std::collections::BinaryHeap;
 use std::cmp::Ordering;
 use std::cmp::Ordering::Equal;
-use std::cell::{Cell, RefCell};
 
 
-#[derive(Debug)]
-struct PartialOrderedEvent {
-    e: Event,
-    before: BitSet,
-}
-
-#[derive(Default, Debug)]
-struct GenericProblem {
-    events: Vec<PartialOrderedEvent>,
-    pub config: Config,
-}
 
 #[derive(Debug)]
 struct SearchTree<'s> {
-    problem: &'s GenericProblem,
+    problem: &'s Problem,
     heap: BinaryHeap<&'s mut Node<'s>>,
     best: Option<&'s Node<'s>>
 }
@@ -99,8 +84,8 @@ impl<'s> SearchTree<'s> {
     }
     fn calculate_distance(&self, from: usize, to: usize) -> DistanceMatrix {
         calculate_distance(self.problem.config.dists_method,
-                           &self.problem.events[from].e.points,
-                           &self.problem.events[to].e.points)
+                           &self.problem.events[from].points,
+                           &self.problem.events[to].points)
     }
 
     fn recover_answer(&self) -> Option<Solution> {
@@ -137,10 +122,7 @@ impl<'s> SearchTree<'s> {
         dbg!(&reverted_schedule_idxs);
 
         for (idx, schedule_item) in reverted_schedule_idxs.iter().rev().enumerate() {
-            result.schedule.push(self.problem.events[idx].e.points[*schedule_item].clone());
-        }
-        if self.problem.config.find_final_route {
-            result.full_route = get_full_route(&result.schedule);
+            result.schedule.push(self.problem.events[idx].points[*schedule_item].clone());
         }
 
         Some(result)
@@ -187,7 +169,7 @@ impl PartialEq for Node<'_> {
 
 impl Eq for Node<'_> {}
 
-fn solve_generic(problem: &GenericProblem) -> Option<Solution> {
+pub fn solve_generic(problem: &Problem) -> Option<Solution> {
     let mut st = SearchTree {
         problem,
         heap: BinaryHeap::new(),
@@ -199,9 +181,9 @@ fn solve_generic(problem: &GenericProblem) -> Option<Solution> {
     for event in problem.events.iter() {
         if event.before.is_empty() {
             let mut bs = BitSet::new();
-            bs.insert(event.e.idx as usize);
+            bs.insert(event.idx as usize);
             let meta = Meta {
-                event_idx: event.e.idx as usize,
+                event_idx: event.idx as usize,
                 last_distances: None,
                 parent: None,
                 last_answers: None,
@@ -234,31 +216,27 @@ fn solve_generic(problem: &GenericProblem) -> Option<Solution> {
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
-    use crate::events::{Event, MyPoint};
+    use crate::distances::MyPoint;
 
-    fn get_sample_problem() -> GenericProblem {
+    fn get_sample_problem() -> Problem {
         let sample_point = MyPoint {
             idx: 0,
             coords: (1f64, 2f64),
         };
-        let sample_event = PartialOrderedEvent {
-            e: Event {
-                idx: 0,
-                points: vec![sample_point],
-            },
-            before: BitSet::new(),
+        let sample_event = Event {
+            idx: 0,
+            points: vec![sample_point],
+            before: BitSet::new()
         };
 
-        let sample_event2 = PartialOrderedEvent {
-            e: Event {
-                idx: 1,
-                points: vec![sample_point],
-            },
-            before: BitSet::new(),
+        let sample_event2 = Event {
+            idx: 1,
+            points: vec![sample_point],
+            before: BitSet::new()
         };
 
 
-        GenericProblem {
+        Problem {
             events: vec![sample_event, sample_event2],
             config: Config::default(),
         }
@@ -268,8 +246,8 @@ mod tests {
     fn test_search() {
         let p = get_sample_problem();
         let result = solve_generic(&p);
-        dbg!(result);
-        assert_eq!(result.schedule.len(), 2);
+        dbg!(&result);
+        assert_eq!(result.unwrap().schedule.len(), 2);
     }
 
 //

@@ -1,15 +1,32 @@
 use serde::{Serialize, Deserialize};
-use geo::prelude::*;
+//use geo::prelude::*;
 
 use ndarray::{Array1, Array2};
 use ndarray_stats::QuantileExt;
+use geo::Point;
+use geo::prelude::*;
 
-use crate::events::MyPoint;
 
 use reqwest;
 //use std::collections::HashMap;
 
 use serde_json;
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+pub struct MyPoint {
+    pub coords: (f64, f64),
+    pub idx: u64,
+}
+
+impl MyPoint {
+    pub fn get_point(&self) -> Point<f64> {
+        Point::from(self.coords)
+    }
+    pub fn get_string_repr(&self) -> String {
+        format!("{},{}", self.coords.0, self.coords.1)
+    }
+}
+
 
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 #[serde(rename_all = "lowercase")]
@@ -75,7 +92,6 @@ pub fn calculate_route_here(points: &[MyPoint], route_attributes: &str) -> serde
 
 fn calculate_distance_here(p1: MyPoint, p2: MyPoint) -> Distance {
     let route = calculate_route_here(&[p1, p2], SUMMARY);
-    let obj = route.as_object().unwrap();
     let travel_time = route["summary"]["travelTime"].as_f64().unwrap();
 
     travel_time
