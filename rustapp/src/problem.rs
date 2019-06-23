@@ -42,7 +42,7 @@ pub struct Config {
     #[serde(default)]
     solve_algorithm: SolveAlgorithm,
     #[serde(default)]
-    pub find_final_route: bool,
+    find_final_route: bool,
 }
 
 

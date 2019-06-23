@@ -1,5 +1,5 @@
 use crate::distances::{DistanceMatrix, AnswersMatrix, squash_distances, calculate_distance};
-use crate::problem::{Problem, Solution, Event, Config};
+use crate::problem::{Problem, Solution};
 
 use bit_set::BitSet;
 use ndarray_stats::QuantileExt;
@@ -9,12 +9,11 @@ use std::cmp::Ordering;
 use std::cmp::Ordering::Equal;
 
 
-
 #[derive(Debug)]
 struct SearchTree<'s> {
     problem: &'s Problem,
     heap: BinaryHeap<&'s mut Node<'s>>,
-    best: Option<&'s Node<'s>>
+    best: Option<&'s Node<'s>>,
 }
 
 impl<'s> SearchTree<'s> {
@@ -104,25 +103,33 @@ impl<'s> SearchTree<'s> {
 
 
         let (start, end) = current_dists_reverse_pass.argmin().unwrap();
-        let mut reverted_schedule_idxs = vec![end];
 
         let mut current_point = end;
-
-        let mut current_meta = node.meta.parent.unwrap();
+        let mut current_meta = &node.meta;
+        let mut reverted_schedule_points = vec![end];
+        let mut reverted_schedule_events = vec![current_meta.event_idx];
 
         while let Some(current_answer) = &current_meta.last_answers {
-            let prev_point = current_answer[(start, current_point)];
-            reverted_schedule_idxs.push(prev_point.clone());
-            current_point = prev_point;
-
+            current_point = current_answer[(start, current_point)];
             current_meta = current_meta.parent.unwrap();
+
+
+            reverted_schedule_points.push(current_point);
+            reverted_schedule_events.push(current_meta.event_idx);
         }
 
-        reverted_schedule_idxs.push(start);
-        dbg!(&reverted_schedule_idxs);
+        reverted_schedule_points.push(start);
+        current_meta = current_meta.parent.unwrap();
 
-        for (idx, schedule_item) in reverted_schedule_idxs.iter().rev().enumerate() {
-            result.schedule.push(self.problem.events[idx].points[*schedule_item].clone());
+        reverted_schedule_events.push(current_meta.event_idx);
+
+        dbg!(&reverted_schedule_points);
+
+        dbg!(&reverted_schedule_events);
+
+        for (event_idx, point_idx) in reverted_schedule_events.iter().zip(
+            reverted_schedule_points.iter()).rev() {
+            result.schedule.push(self.problem.events[*event_idx].points[*point_idx].clone());
         }
 
         Some(result)
@@ -176,7 +183,7 @@ pub fn solve_generic(problem: &Problem) -> Option<Solution> {
         best: None,
 
     };
-    let mut roots =  Vec::new();
+    let mut roots = Vec::new();
 
     for event in problem.events.iter() {
         if event.before.is_empty() {
@@ -214,62 +221,38 @@ pub fn solve_generic(problem: &Problem) -> Option<Solution> {
 
 #[cfg(test)]
 mod tests {
-    // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
     use crate::distances::MyPoint;
+    use crate::problem::{Event, Config};
 
-    fn get_sample_problem() -> Problem {
-        let sample_point = MyPoint {
-            idx: 0,
-            coords: (1f64, 2f64),
-        };
+    #[test]
+    fn test_search() {
         let sample_event = Event {
             idx: 0,
-            points: vec![sample_point],
-            before: BitSet::new()
+            points: vec![MyPoint {
+                idx: 0,
+                coords: (1f64, 2f64),
+            }],
+            before: vec![1usize].into_iter().collect(),
         };
 
         let sample_event2 = Event {
             idx: 1,
-            points: vec![sample_point],
-            before: BitSet::new()
+            points: vec![MyPoint {
+                idx: 1,
+                coords: (1f64, 2f64),
+            }],
+            before: BitSet::new(),
         };
 
-
-        Problem {
+        let p = Problem {
             events: vec![sample_event, sample_event2],
             config: Config::default(),
-        }
-    }
-
-    #[test]
-    fn test_search() {
-        let p = get_sample_problem();
-        let result = solve_generic(&p);
+        };
+        let result = solve_generic(&p).unwrap();
         dbg!(&result);
-        assert_eq!(result.unwrap().schedule.len(), 2);
+        assert_eq!(result.schedule.len(), 2);
+        assert_eq!(result.schedule[0].idx, 1);
+        assert_eq!(result.schedule[1].idx, 0);
     }
-
-//
-//    #[test]
-//    fn test_stupid_solution() {
-//        let p = get_sample_problem();
-//        let s = solve_stupid(&p);
-//        assert_eq!(s.schedule.len(), p.ordered_events.len());
-//    }
-//
-//
-//    #[test]
-//    fn test_ordered_solution() {
-//        let p = get_sample_problem();
-//        let s = solve_ordered(&p);
-//        assert_eq!(s.schedule.len(), p.ordered_events.len());
-//    }
-//
-//    #[test]
-//    fn test_serialize() {
-//        let p = get_sample_problem();
-//        let serialized = serde_json::to_string(&p).unwrap();
-//        assert_eq!(serialized, r#"{"ordered_events":[{"idx":0,"points":[{"coords":[1.0,2.0],"idx":0}]}],"config":{"dists_method":"dummy","solve_algorithm":"ordered"}}"#);
-//    }
 }

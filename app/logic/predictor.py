@@ -35,7 +35,11 @@ def normalize_config(config):
     result["city"] = city
     result['dists_method'] = config.get('routingBackend') or 'dummy'
     result["solver"] = config.get("solver") or "python"
-    default_clipping = 500 if result["solver"]=='rust' else 50
+    alg = config.get("solve_algorithm")
+    if alg:
+        result["solve_algorithm"] = alg
+
+    default_clipping = 100 if result["solver"]=='rust' else 50
     result["clipping"] = int(config.get('clipping') or default_clipping)
     if result["dists_method"]=='here':
         result["clipping"] = min(result["clipping"], 5)
@@ -48,7 +52,6 @@ def dummy_dist(x, y):
 
 
 def squash_distances(matrix1, matrix2):
-    # print("Squashing", matrix1.shape, matrix2.shape)
     dists = np.zeros((matrix1.shape[0], matrix2.shape[1]), dtype=float)
     answers = np.zeros((matrix1.shape[0], matrix2.shape[1]), dtype=int)
     for i in range(dists.shape[0]):
@@ -163,7 +166,6 @@ class Predictor:
         self.checkpoint("rust_data_prepared")
         result = requests.post(RUST_URL, json={"ordered_events": rust_events,
                                                "config": self.config}).json()
-        print( result.get('full_route'), flush=True)
         self.final_route = result.get('full_route')
         self.checkpoint("rust_completed")
         answer = []
@@ -221,7 +223,6 @@ class Predictor:
             category = event.get('category')
             brand = event.get('brand')
             query = {"categories": category, "city": self.config['city']}
-            print("Query:", query, flush=True)
             if brand:
                 query['brand'] = brand
             result = list(places.find(query, {'location': 1}))

@@ -3,7 +3,7 @@ use ndarray_stats::QuantileExt;
 
 use crate::distances::{MyPoint, DistanceMatrix, AnswersMatrix,
                        calculate_distance, squash_distances};
-use crate::problem::{Event, Problem, Config, Solution};
+use crate::problem::{Event, Problem, Solution};
 
 
 fn sample_any(event: &Event) -> &MyPoint {
@@ -87,6 +87,7 @@ pub fn solve_stupid(p: &Problem) -> Solution {
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
+    use crate::problem::Config;
     use bit_set::BitSet;
 
     fn get_sample_problem() -> Problem {

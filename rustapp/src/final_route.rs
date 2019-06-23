@@ -32,6 +32,6 @@ mod tests {
 
         let full_route = get_full_route(&schedule).unwrap();
         println!("{:?}", full_route);
-//        assert_eq!(0.0, 0.1);
+        assert_eq!(!full_route.empty());
     }
 }
