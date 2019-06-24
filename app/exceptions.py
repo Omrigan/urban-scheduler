@@ -42,3 +42,10 @@ class InvalidCity(USException):
         self.message = self.message % (city, )
         super(InvalidCity, self).__init__()
 
+class ExternalError(USException):
+    def __init__(self, values):
+        self.__class__.__name__ = values.get('error_name')
+        self.code = values.get('error_code')
+        self.message = values.get('error_message')
+
+

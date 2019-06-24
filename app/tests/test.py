@@ -100,7 +100,8 @@ class TC(TestCase):
         f = open('helpers/sample_requests/ordered_benchmark.yaml')
         content = load(f)
         resp = request('/predict', content)
-        print(resp['schedule'])
+
+        print(resp)
         self.assertEqual(resp['schedule'], [{
                                                 'additional_fields': {}, 'brand': 'музейный парк',
                                                 'categories': ['park', 'point_of_interest', 'establishment'],

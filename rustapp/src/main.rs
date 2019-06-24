@@ -6,12 +6,14 @@ extern crate rocket;
 extern crate scan_fmt;
 
 
-use crate::problem::{PublicProblem, Solution, normalize_problem};
-use crate::solve_ordered::{solve_ordered};
+use crate::problem::{PublicProblem, Solution, normalize_problem, solve};
 
 use rocket_contrib::json::{Json};
-use rocket::Rocket;
+use rocket::{Rocket, Request};
 use rocket::config::{Config, Environment};
+use rocket::response::Responder;
+
+use serde::{Serialize, Deserialize};
 
 mod solve_ordered;
 mod solve_generic;
@@ -20,27 +22,58 @@ mod final_route;
 mod problem;
 //mod test_performance;
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Error {
+    error_name: &'static str,
+    error_code: usize,
+    error_message: &'static str
+}
+
+#[catch(500)]
+fn internal_error() -> Json<Error> {
+    Json(Error {
+        error_name: "Unknown error",
+        error_code: 500,
+        error_message: "Oops"
+    })
+}
+
+#[catch(404)]
+fn not_found(req: &Request) -> Json<Error> {
+      Json(Error {
+        error_name: "Not found",
+        error_code: 404,
+        error_message: "Oops"
+    })
+}
+
+
 #[post("/predict_raw", format = "json", data = "<problem_raw>")]
-fn predict_raw(problem_raw: Json<PublicProblem>) -> Json<Solution> {
+fn predict_raw(problem_raw: Json<PublicProblem>) -> Result<Json<Solution>, Json<Error>> {
     let problem = problem_raw;
     let normalized_problem = normalize_problem(problem.into_inner());
-//    println!("{:?}", problem);
-    let solution = solve_ordered(&normalized_problem);
-    Json(solution)
+    let solution = solve(&normalized_problem);
+    match solution {
+    Some(x) => Ok(Json(x)),
+        None => Err(Json(Error {
+            error_name: "Solver error",
+            error_code: 32,
+            error_message: "Oops"
+        }))
+    }
 }
 
 
 fn rocket() -> Rocket {
     let config = Config::build(Environment::Staging)
-    .address("0.0.0.0")
-    .port(80)
-    .finalize().unwrap();
+    .address("0.0.0.0").port(80).finalize()
+        .unwrap();
 
     rocket::custom(config).mount("/", routes![predict_raw])
 }
 
 fn main() {
-    rocket().launch();
+    rocket().register(catchers![internal_error, not_found]).launch();
 }
 
 

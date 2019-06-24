@@ -255,4 +255,32 @@ mod tests {
         assert_eq!(result.schedule[0].idx, 1);
         assert_eq!(result.schedule[1].idx, 0);
     }
+
+    #[test]
+    fn test_incorrect() {
+        let sample_event = Event {
+            idx: 0,
+            points: vec![MyPoint {
+                idx: 0,
+                coords: (1f64, 2f64),
+            }],
+            before: vec![1usize].into_iter().collect(),
+        };
+
+        let sample_event2 = Event {
+            idx: 1,
+            points: vec![MyPoint {
+                idx: 1,
+                coords: (1f64, 2f64),
+            }],
+            before: vec![0usize].into_iter().collect(),
+        };
+
+        let p = Problem {
+            events: vec![sample_event, sample_event2],
+            config: Config::default(),
+        };
+        let result = solve_generic(&p);
+        assert!(result.is_none());
+    }
 }

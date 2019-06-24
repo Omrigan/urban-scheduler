@@ -9,7 +9,7 @@ import numpy as np
 from lib import cities
 
 from process import connector
-from exceptions import InvalidRequest, InvalidEvent, InvalidCity
+from exceptions import InvalidRequest, InvalidEvent, InvalidCity, ExternalError
 from logic.event_types import EventTypes
 import random
 import osm_connector
@@ -148,10 +148,9 @@ class Predictor:
     def _solve_ordered_rust(self, all_candidates):
         events_int_to_mongo = []
         rust_events = []
-        for event_idx, event in enumerate(all_candidates):
+        for event in all_candidates:
             this_dct = {}
             this_event = {
-                "idx": event_idx,
                 "points": []
             }
             for i, point in enumerate(event):
@@ -166,6 +165,8 @@ class Predictor:
         self.checkpoint("rust_data_prepared")
         result = requests.post(RUST_URL, json={"ordered_events": rust_events,
                                                "config": self.config}).json()
+        if 'error_code' in result:
+            raise ExternalError(result)
         self.final_route = result.get('full_route')
         self.checkpoint("rust_completed")
         answer = []

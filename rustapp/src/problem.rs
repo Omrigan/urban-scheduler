@@ -92,11 +92,11 @@ pub fn normalize_problem(problem: PublicProblem) -> Problem {
     }
 }
 
-pub fn solve(problem: Problem) -> Option<Solution> {
+pub fn solve(problem: &Problem) -> Option<Solution> {
     let mut solution = match problem.config.solve_algorithm {
-        SolveAlgorithm::Stupid => solve_stupid(&problem),
-        SolveAlgorithm::Ordered => solve_ordered(&problem),
-        SolveAlgorithm::Generic => solve_generic(&problem)?,
+        SolveAlgorithm::Stupid => solve_stupid(problem),
+        SolveAlgorithm::Ordered => solve_ordered(problem),
+        SolveAlgorithm::Generic => solve_generic(problem)?,
     };
 
     if problem.config.find_final_route {
