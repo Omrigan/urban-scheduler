@@ -172,7 +172,6 @@ class Predictor:
         answer = []
         for dct, point in zip(events_int_to_mongo, result['schedule']):
             answer.append(dct[point['idx']])
-        print(answer)
         return answer
 
 

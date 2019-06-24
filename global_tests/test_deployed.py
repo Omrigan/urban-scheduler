@@ -8,6 +8,7 @@ class TC(TestCase):
     def test_params(self):
         resp = get(DOMAIN+"/get_params")
         self.assertEqual(resp.status_code, 200, resp.json())
+        print(resp)
 
 
     def test_error(self):
