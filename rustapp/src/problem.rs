@@ -99,9 +99,9 @@ pub fn solve(problem: &Problem) -> Option<Solution> {
         SolveAlgorithm::Generic => solve_generic(problem)?,
     };
 
-    if problem.config.find_final_route {
+//    if problem.config.find_final_route {
         solution.full_route = get_full_route(&solution.schedule);
-    }
+//    }
     Some(solution)
 }
 
