@@ -81,7 +81,7 @@ class CategoryEvent extends Component {
                               options={contextOptions.categoriesList}/>
                     {this.props.event.category &&
                     <Dropdown clearable
-                              placeholder='Brand'
+                              placeholder='Brand (optional)'
                               defaultValue={this.props.event.brand}
                               onChange={this.onChangeBrand}
                               fluid search selection
