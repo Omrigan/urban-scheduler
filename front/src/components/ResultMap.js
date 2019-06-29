@@ -1,12 +1,6 @@
 import React, {Component} from 'react';
 import '../App.css';
-import ListOfMarkers from './ListOfMarkers';
-import ResultItemsList from './ResultItem';
 
-// import HEREMap from 'react-here-maps'
-import {Helmet} from "react-helmet";
-// import '../vendor/mapsjs-core'
-// import './vendor/mapsjs-service.js'
 
 
 export default class ResultMap extends Component {
