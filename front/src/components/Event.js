@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Input, Dropdown} from 'semantic-ui-react'
+import {Input, Dropdown, Button, Icon} from 'semantic-ui-react'
 import {OptionsContext, CenterContext} from '../lib/api'
 import '../App.css'
 import CoordinatesSelector from './CoordinatesSelector'
@@ -116,6 +116,16 @@ export class Event extends Component {
         const event = this.renderEvent(this.props.event);
         return (
             <div className="ui raised segment">
+                <Button primary className="icon" onClick={this.props.down}>
+                    <Icon name="caret down"/>
+                </Button>
+                <Button primary className="icon" onClick={this.props.up}>
+                    <Icon name="caret up"/>
+                </Button>
+                <Button color="red" className="icon" onClick={this.props.drop}>
+                    <Icon name="delete"/>
+                </Button>
+                <br/>
                 <Dropdown clearable
                           placeholder='Event type'
                           defaultValue={this.props.event.type}

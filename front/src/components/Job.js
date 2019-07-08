@@ -143,6 +143,43 @@ export class Job extends Component {
         }
     };
 
+    down = (key) => {
+        this.setState(state => {
+            if ((key+1)== state.eventStates.length) {
+                return state;
+            }
+            const head = state.eventStates.slice(0, key);
+            const tail = state.eventStates.slice(key + 2, state.eventStates.length);
+            const result = head.concat([state.eventStates[key + 1],
+                state.eventStates[key]]).concat(tail);
+            return {
+                eventStates: result
+            };
+        })
+    };
+    up = (key) => {
+        this.setState(state => {
+            if (key==0) {
+                return state;
+            }
+            const head = state.eventStates.slice(0, key-1);
+            const tail = state.eventStates.slice(key + 1, state.eventStates.length);
+            const result = head.concat([state.eventStates[key],
+                state.eventStates[key-1]]).concat(tail);
+
+            return {
+                eventStates: result
+            };
+        })
+    };
+    drop = (key) => {
+        this.setState(state => {
+            return {
+                eventStates: state.eventStates.filter((value, idx) =>  (idx !=key))
+            };
+        })
+    };
+
     render() {
         return (
             <div className="">
@@ -176,6 +213,9 @@ export class Job extends Component {
                         {this.state.eventStates.map((x, i) =>
                             <Event key={i.toString()}
                                    event={x}
+                                   down={this.down.bind(this, i)}
+                                   up={this.up.bind(this, i)}
+                                   drop={this.drop.bind(this, i)}
                                    onChange={this.eventChanged.bind(this, i)}/>
                         )} <br/>
 

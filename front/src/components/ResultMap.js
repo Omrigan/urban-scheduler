@@ -12,7 +12,6 @@ export default class ResultMap extends Component {
     render() {
         return (<React.Fragment>
             <div id="here-map" style={{width: '100%', height: '400px', background: 'grey'}}/>
-
         </React.Fragment>)
     }
 
