@@ -14,8 +14,8 @@ sigint_handler()
 trap sigint_handler SIGINT
 
 while true; do
-  cargo build --release --target=x86_64-unknown-linux-musl
-  cargo run --release --target=x86_64-unknown-linux-musl &
+  cargo build  --target=x86_64-unknown-linux-musl
+  cargo run --target=x86_64-unknown-linux-musl &
   PID=$!
   sleep 5
   inotifywait -e modify -e move -e create -e delete -e attrib -r `pwd`
