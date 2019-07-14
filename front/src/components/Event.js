@@ -44,7 +44,6 @@ class FixedEvent extends Component {
     };
 
     render() {
-        console.log("Context consumer", CenterContext.Consumer);
         return (
             <CenterContext.Consumer>
                 {center =>
@@ -148,7 +147,7 @@ export class Event extends Component {
         const value = data.value;
         let result = {type: value};
         if (value == 'sequential' || value == 'parallel') {
-            result.items = [];
+            result.items = this.props.event.items || [];
         }
         this.props.onChange(result, true);
     };
