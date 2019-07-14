@@ -47,28 +47,28 @@ export default class Config extends Component {
 
     onClippingChange = (e) => {
         const value = e.target.value;
-        this.props.onChangeConfig({
+        this.props.changeConfig({
             clipping: value
         });
     };
 
     onChangeBackend = (e, data) => {
         const value = data.value;
-        this.props.onChangeConfig({
+        this.props.changeConfig({
             routingBackend: value,
         });
     };
 
     onChangeCity = (e, data) => {
         const value = data.value;
-        this.props.onChangeConfig({
+        this.props.changeConfig({
             city: value,
         });
     };
 
     onChangeSolver = (e, data) => {
         const value = data.value;
-        this.props.onChangeConfig({
+        this.props.changeConfig({
             solver: value,
         });
     };

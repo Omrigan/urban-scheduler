@@ -4,7 +4,7 @@ import React from 'react';
 import update from 'immutability-helper';
 
 
-const fetchCallback = (setState, result) => {
+const fetchCallback = (setOptions, result) => {
     const categoriesList = result.data.map((x, i) =>
         ({
             text: x.name,
@@ -20,19 +20,18 @@ const fetchCallback = (setState, result) => {
         return obj;
     }, {});
 
-    setState(
-        {
-            categoriesList: categoriesList,
-            categories: result.data,
-            brands: brands
-        });
+    setOptions({
+        categoriesList: categoriesList,
+        categories: result.data,
+        brands: brands
+    });
 };
 
 export const OptionsContext = React.createContext({});
 export const CenterContext = React.createContext([0, 0]);
 
-export const getOptions = (setState) => {
-    return axios.get(BACKEND_URL + '/get_params').then((result) => fetchCallback(setState, result));
+export const getOptions = (setOptions) => {
+    return axios.get(BACKEND_URL + '/get_params').then((result) => fetchCallback(setOptions, result));
 };
 
 

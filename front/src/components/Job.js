@@ -16,8 +16,6 @@ function empty_container() {
 }
 
 export class Job extends Component {
-
-
     constructor(props) {
         super(props);
 
@@ -46,17 +44,16 @@ export class Job extends Component {
         getOptions((options) => {
             this.setState({
                 options: options,
-                eventStates: loadEventStates()
             });
-
-        });
+        }).then(() => this.setState({
+            eventContainer: loadEventStates()
+        }));
 
 
         getCities(this.setState.bind(this));
-
     }
 
-    eventChanged = (newContent) => {
+    changeContainer = (newContent) => {
         this.setState((state) => {
             return {
                 eventContainer: newContent
@@ -64,13 +61,13 @@ export class Job extends Component {
         });
     };
 
-    onChangeConfig = (newConfig) => {
+    changeConfig = (newConfig) => {
         this.setState((state) =>
             ({config: update(state.config, {$merge: newConfig})}))
     };
 
 
-    send = () => {
+    legacySend = () => {
         this.props.startPredict();
         const job = {
             ordered_events: this.state.eventContainer.items,
@@ -125,14 +122,15 @@ export class Job extends Component {
     render() {
         return (
             <div className="">
-                <Config onChangeConfig={this.onChangeConfig}
+                <Config onChangeConfig={this.changeConfig}
                         config={this.state.config}
                         cities={this.state.cities}/>
 
                 <Button color='green' onClick={this.send}>Send</Button>
-                <AddButton onChange={this.eventChanged}
+                <Button color='yellow' onClick={this.legacySend}>Legacy send</Button>
+                <AddButton onChange={this.changeContainer}
                            event={this.state.eventContainer}/>
-                {/*<Button primary onClick={this.addEvent}>Add</Button>*/}
+                <br/><br/>
                 <Button color='orange'
                         onClick={this.save}>Save</Button>
                 <Button color='teal'
@@ -148,9 +146,11 @@ export class Job extends Component {
                            type="file"
                     />
                 </Button>
+
+
                 <CenterContext.Provider value={this.getCenter()}>
                     <OptionsContext.Provider value={this.state.options}>
-                        <ContainerEvent onChange={this.eventChanged}
+                        <ContainerEvent onChange={this.changeContainer}
                                         event={this.state.eventContainer}/>
                     </OptionsContext.Provider>
                 </CenterContext.Provider>

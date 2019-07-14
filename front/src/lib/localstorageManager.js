@@ -1,4 +1,4 @@
-export const saveEventStates = (eventStates) => {
+export const saveProblem = (eventStates) => {
     localStorage.setItem('eventStates', JSON.stringify(eventStates))
 };
 
