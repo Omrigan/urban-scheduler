@@ -1,4 +1,4 @@
-import {Event} from "./Event";
+import {AddButton} from "./Event";
 // import {Button} from "reactstrap";
 import {Button, Label, Icon} from "semantic-ui-react";
 import React, {Component} from 'react';
@@ -58,7 +58,7 @@ export class Job extends Component {
 
     eventChanged = (newContent) => {
         this.setState((state) => {
-            return  {
+            return {
                 eventContainer: newContent
             }
         });
@@ -121,6 +121,7 @@ export class Job extends Component {
         }
     };
 
+
     render() {
         return (
             <div className="">
@@ -129,6 +130,8 @@ export class Job extends Component {
                         cities={this.state.cities}/>
 
                 <Button color='green' onClick={this.send}>Send</Button>
+                <AddButton onChange={this.eventChanged}
+                           event={this.state.eventContainer}/>
                 {/*<Button primary onClick={this.addEvent}>Add</Button>*/}
                 <Button color='orange'
                         onClick={this.save}>Save</Button>

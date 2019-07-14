@@ -7,7 +7,9 @@ import '../App.css'
 import CoordinatesSelector from './CoordinatesSelector'
 import update from "immutability-helper";
 
-
+function get_empty() {
+    return {type: null};
+}
 
 const eventTypes = [
     {
@@ -108,6 +110,19 @@ class CategoryEvent extends Component {
     }
 }
 
+export class AddButton extends Component {
+    onClick = () => {
+        const mutator = {$push: [get_empty()]};
+        this.props.onChange({items: update(this.props.event.items, mutator)});
+    };
+
+    render() {
+        return <Button color="green" className="icon" onClick={this.onClick}>
+            <Icon name="plus"/>
+        </Button>;
+    }
+}
+
 export class Event extends Component {
 
     renderEvent = (event) => {
@@ -141,6 +156,8 @@ export class Event extends Component {
 
     render() {
         const event = this.renderEvent(this.props.event);
+        const canAdd = this.props.event.type === "parallel" ||
+            this.props.event.type === "sequential";
         return (
             <div className="ui raised segment">
                 <Button primary className="icon" onClick={this.props.down}>
@@ -152,8 +169,8 @@ export class Event extends Component {
                 <Button color="red" className="icon" onClick={this.props.drop}>
                     <Icon name="delete"/>
                 </Button>
-
-
+                {canAdd && <AddButton onChange={this.props.onChange}
+                                      event={this.props.event}/>}
                 <br/>
                 <Dropdown clearable
                           placeholder='Event type'

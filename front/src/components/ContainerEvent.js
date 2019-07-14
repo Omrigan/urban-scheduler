@@ -3,9 +3,6 @@ import update from "immutability-helper";
 import React, {Component} from "react";
 import {Event} from "./Event";
 
-function get_empty() {
-    return {type: null};
-}
 
 export default class ContainerEvent extends Component {
 
@@ -25,7 +22,7 @@ export default class ContainerEvent extends Component {
         if (this.props.event.type === 'parallel') {
             const panes = this.props.event.items.map((subevent, idx) => (
                 {
-                    menuItem: idx,
+                    menuItem: idx.toString(),
                     render: () => <Tab.Pane>
                         {this.renderEvent(subevent, idx)}
                     </Tab.Pane>
@@ -36,19 +33,12 @@ export default class ContainerEvent extends Component {
             objects = this.props.event.items.map(this.renderEvent);
         }
         return <React.Fragment>
-            <Button color="green" className="icon" onClick={this.addChild}>
-                <Icon name="plus"/>
-            </Button>
+
             {objects}
         </React.Fragment>;
     }
 
     // Event manipulation
-    addChild = () => {
-        console.log("Adding")
-        this.propagateChanges({$push: [get_empty()]});
-
-    };
 
     childDown = (key) => {
         const items = this.props.event.items;
