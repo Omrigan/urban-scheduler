@@ -18,7 +18,7 @@ export class Result extends Component {
 
             <ResultMap schedule={this.props.result.schedule}
                        final_route={this.props.result.final_route}
-                           center={this.props.result.center}/>
+                       center={this.props.result.center}/>
         </div>)
     }
 }

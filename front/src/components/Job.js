@@ -122,7 +122,6 @@ export class Job extends Component {
     };
 
     render() {
-        console.log("context", OptionsContext);
         return (
             <div className="">
                 <Config onChangeConfig={this.onChangeConfig}
@@ -130,7 +129,7 @@ export class Job extends Component {
                         cities={this.state.cities}/>
 
                 <Button color='green' onClick={this.send}>Send</Button>
-                <Button primary onClick={this.addEvent}>Add</Button>
+                {/*<Button primary onClick={this.addEvent}>Add</Button>*/}
                 <Button color='orange'
                         onClick={this.save}>Save</Button>
                 <Button color='teal'

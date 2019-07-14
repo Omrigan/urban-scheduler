@@ -17,7 +17,10 @@ export default class ResultItemsList extends Component<> {
 
     render() {
         return this.props.schedule.map((x, i) =>
-                        <ResultItem title={x.name} description={x.description}/>
+                        <ResultItem
+                            key={i}
+                            title={x.name}
+                            description={x.description}/>
                     )
     }
 }
