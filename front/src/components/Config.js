@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {Input, Dropdown} from 'semantic-ui-react'
 import '../App.css'
 
-import {loadResult} from "../lib/localstorageManager";
+import {loadResult} from "../lib/ioManager";
 
 
 const routingBackends = [

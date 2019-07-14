@@ -46,13 +46,12 @@ export const getCities = (setState) => {
             }));
 
         setState({cities: cityOptions2, citiesRaw: result.data});
-        // setState((oldState) => (update(oldState, {cities: cityOptions2, citiesRaw: result.data, config: {city: "moscow"}})));
     });
 };
 
 
-export const postJob = (data, updateResult) => {
+export const postProblem = (data, updateResult, updateError) => {
     axios.post(BACKEND_URL + '/predict', data)
-        .catch((error) => updateResult(null, error.response.data))
-        .then((response) => updateResult(response.data, null));
+        .then((response) => updateResult(response.data))
+        .catch((error) => updateError(error.response.data));
 };

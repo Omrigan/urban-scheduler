@@ -2,11 +2,12 @@ import {AddButton} from "./Event";
 // import {Button} from "reactstrap";
 import {Button, Label, Icon} from "semantic-ui-react";
 import React, {Component} from 'react';
-import {getCities, getOptions, postJob} from "../lib/api";
+import {getCities, getOptions, postProblem} from "../lib/api";
 import {OptionsContext, CenterContext} from "../lib/api";
 import update from 'immutability-helper';
 import Config from "./Config";
-import {saveEventStates, loadEventStates} from "../lib/localstorageManager";
+import {exportProblem, importProblem, saveProblem, loadProblem} from "../lib/ioManager";
+
 import {safeLoad, safeDump} from "js-yaml"
 import ContainerEvent from "./ContainerEvent";
 
@@ -14,6 +15,8 @@ import ContainerEvent from "./ContainerEvent";
 function empty_container() {
     return {items: []}
 }
+
+const defaultProblemVersion = 2;
 
 export class Job extends Component {
     constructor(props) {
@@ -45,9 +48,9 @@ export class Job extends Component {
             this.setState({
                 options: options,
             });
-        }).then(() => this.setState({
-            eventContainer: loadEventStates()
-        }));
+        }).then(() =>
+            this.setProblem(loadProblem() || empty_container())
+        );
 
 
         getCities(this.setState.bind(this));
@@ -67,48 +70,66 @@ export class Job extends Component {
     };
 
 
-    legacySend = () => {
-        this.props.startPredict();
-        const job = {
-            ordered_events: this.state.eventContainer.items,
-            config: this.state.config
+    getProblem = (version) => {
+        if (!version)
+            version = defaultProblemVersion;
+        let problem = {
+            config: this.state.config,
+            version: version
         };
-        postJob(job, this.props.updateResult);
 
-    };
-
-    exportProblemFile = () => {
-        const element = document.createElement("a");
-        const file = new Blob([safeDump(this.state.eventContainer)], {type: 'plain/text'});
-        element.href = URL.createObjectURL(file);
-        element.download = "problem.yaml";
-        document.body.appendChild(element); // Required for this to work in FireFox
-        element.click();
-    };
-    importProblemFile = (e) => {
-        let file = e.target.files[0];
-        if (!file) {
-            return;
+        if (version === 1) {
+            problem.ordered_events = this.state.eventContainer.items;
+        } else {
+            problem.events = this.state.eventContainer.items;
         }
-        let reader = new FileReader();
-        reader.onload = (e) => {
-            let contents = safeLoad(e.target.result);
-            console.log(contents);
-            // Display file content
-            this.setState({eventContainer: {items: contents.ordered_events}})
-        };
-        reader.readAsText(file);
+        return problem;
     };
 
+    setProblem = (problem) => {
+        this.setState({
+            config: problem.config,
+            eventContainer: {items: problem.events},
+        })
+    };
+
+
+    legacySend = () => {
+        const noLegacy = this.state.eventContainer.items.some((event) =>
+            (event.type === "parallel" || event.type === "sequential"));
+        if (noLegacy) {
+            this.props.updateError({error_message: "No nested events!"})
+        }
+
+        this.props.startPredict();
+        const problem = this.getProblem(1);
+        postProblem(problem, this.props.updateResult, this.props.updateError);
+    };
+
+    send = () => {
+        this.props.startPredict();
+        const problem = this.getProblem(2);
+        postProblem(problem, this.props.updateResult, this.props.updateError);
+    };
+
+
+    save = () => {
+        saveProblem(this.getProblem());
+        this.props.saveResult();
+    };
+
+    exportProblemBtn = () => {
+        exportProblem(this.getProblem());
+    };
+
+    importProblemBtn = (e) => {
+        this.setProblem(importProblem(e));
+    };
 
     clear = () => {
         this.setState({eventContainer: empty_container()})
     };
 
-    save = () => {
-        saveEventStates(this.state.eventContainer);
-        this.props.saveResult();
-    };
 
     getCenter = () => {
         if (this.state.config.city) {
@@ -136,10 +157,10 @@ export class Job extends Component {
                 <Button color='teal'
                         onClick={this.clear}>Clear</Button>
                 <Button color='purple'
-                        onClick={this.exportProblemFile}>Export</Button>
+                        onClick={this.exportProblemBtn}>Export</Button>
                 <Button as="label" basic htmlFor="upload">
                     Import
-                    <input onChange={this.importProblemFile}
+                    <input onChange={this.importProblemBtn}
                            hidden
                            id="upload"
                            multiple
