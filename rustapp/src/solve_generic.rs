@@ -92,6 +92,7 @@ impl<'s> SearchTree<'s> {
         let mut result = Solution {
             schedule: Vec::with_capacity(self.problem.events.len()),
             full_route: None,
+            center: (55.7494539, 37.62160470000001)
         };
 
         let last_dists = node.meta.last_distances.as_ref();

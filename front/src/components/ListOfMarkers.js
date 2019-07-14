@@ -22,9 +22,8 @@ const MyMarkersList = ({schedule}) => {
     const markers = schedule.map((x, i) => ({
         key: i,
         name: i,
-        position: [x["location"]['lat'], x["location"]['lng']],
+        position: x["coords"],
         content: x["brand"]
-
     }));
 
     const items = markers.map(({key, ...props}) => (

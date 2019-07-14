@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import '../App.css';
 
 
-
 export default class ResultMap extends Component {
     constructor(props) {
         super(props);
@@ -36,7 +35,10 @@ export default class ResultMap extends Component {
         const mapEvents = new H.mapevents.MapEvents(map);
         const behavior = new H.mapevents.Behavior(mapEvents);
 
-        const markers = this.props.schedule.map(item => new H.map.Marker(item.location));
+        const markers = this.props.schedule.map(item => new H.map.Marker({
+            lat: item.coords[0],
+            lng: item.coords[1]
+        }));
         this.state.map.addObjects(markers);
 
         const routeShape = this.props.final_route;

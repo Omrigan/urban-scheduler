@@ -31,6 +31,7 @@ pub struct Error {
 
 #[catch(500)]
 fn internal_error() -> Json<Error> {
+    println!("Catcher 500");
     Json(Error {
         error_name: "Unknown error",
         error_code: 500,

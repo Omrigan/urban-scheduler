@@ -15,6 +15,7 @@ pub fn solve_ordered(p: &Problem) -> Solution {
     let mut result = Solution {
         schedule: Vec::with_capacity(p.events.len()),
         full_route: None,
+        center: (55.7494539, 37.62160470000001)
     };
     if p.events.len() == 0 {
         return result;
@@ -78,7 +79,8 @@ pub fn solve_stupid(p: &Problem) -> Solution {
     }
     Solution {
         schedule,
-        full_route: None
+        full_route: None,
+        center: (55.7494539, 37.62160470000001)
     }
 }
 

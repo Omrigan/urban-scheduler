@@ -81,6 +81,7 @@ export class Job extends Component {
         if (version === 1) {
             problem.ordered_events = this.state.eventContainer.items;
         } else {
+
             problem.events = this.state.eventContainer.items;
         }
         return problem;

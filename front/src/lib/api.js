@@ -53,5 +53,8 @@ export const getCities = (setState) => {
 export const postProblem = (data, updateResult, updateError) => {
     axios.post(BACKEND_URL + '/predict', data)
         .then((response) => updateResult(response.data))
-        .catch((error) => updateError(error.response.data));
+        .catch((error) => {
+            console.log(error);
+            updateError(error.response && error.response.data)
+        });
 };
