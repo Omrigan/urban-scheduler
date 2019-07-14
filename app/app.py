@@ -4,9 +4,10 @@ from flask import request, jsonify
 import lib
 from flask_cors import CORS
 from exceptions import USException
-from logic.predictor import Predictor
+from logic.predictor import Predictor, RUST_URL
 import traceback
 
+import requests
 from process.connector import get_db
 
 db = get_db()
@@ -39,6 +40,11 @@ def handle_any(error):
 @app.route('/predict', methods=["POST"])
 def predict():
     data = request.get_json()
+    if data.get("version") == 2:
+        result = requests.post(RUST_URL, json=data)
+
+        return (result.text, result.status_code)
+
     ordered_events = data.get("ordered_events")
     job = Predictor(data.get('config'))
     schedule = job.predict_ordered(ordered_events)

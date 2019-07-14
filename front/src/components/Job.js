@@ -108,7 +108,7 @@ export class Job extends Component {
 
     send = () => {
         this.props.startPredict();
-        const problem = this.getProblem(2);
+        const problem = this.getProblem(defaultProblemVersion);
         postProblem(problem, this.props.updateResult, this.props.updateError);
     };
 
