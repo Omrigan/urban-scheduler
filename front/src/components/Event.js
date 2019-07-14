@@ -1,8 +1,12 @@
 import React, {Component} from 'react';
-import {Input, Dropdown, Button, Icon} from 'semantic-ui-react'
+import {Input, Dropdown, Button, Icon, Tab} from 'semantic-ui-react'
+import ContainerEvent from "./ContainerEvent";
+
 import {OptionsContext, CenterContext} from '../lib/api'
 import '../App.css'
 import CoordinatesSelector from './CoordinatesSelector'
+import update from "immutability-helper";
+
 
 
 const eventTypes = [
@@ -15,7 +19,17 @@ const eventTypes = [
         text: "Category",
         key: 2,
         value: "category"
-    }
+    },
+    {
+        text: "Parallel",
+        key: 3,
+        value: "parallel"
+    },
+    {
+        text: "Sequential",
+        key: 4,
+        value: "sequential"
+    },
 ];
 
 class FixedEvent extends Component {
@@ -28,6 +42,7 @@ class FixedEvent extends Component {
     };
 
     render() {
+        console.log("Context consumer", CenterContext.Consumer);
         return (
             <CenterContext.Consumer>
                 {center =>
@@ -71,6 +86,7 @@ class CategoryEvent extends Component {
 
 
     render() {
+        console.log("Context consumer", OptionsContext.Consumer);
         return (<OptionsContext.Consumer>
             {contextOptions =>
                 <React.Fragment>
@@ -102,13 +118,24 @@ export class Event extends Component {
             case 'category':
                 return (<CategoryEvent event={event}
                                        onChange={this.props.onChange}/>);
+            case 'parallel':
+                return (<ContainerEvent event={event}
+                                        onChange={this.props.onChange}/>);
+            case 'sequential':
+                return (<ContainerEvent event={event}
+                                        onChange={this.props.onChange}/>);
             default:
                 return null
         }
     };
+
     onChangeType = (e, data) => {
         const value = data.value;
-        this.props.onChange({type: value});
+        let result = {type: value};
+        if (value == 'sequential' || value == 'parallel') {
+            result.items = [];
+        }
+        this.props.onChange(result, true);
     };
 
 
@@ -125,6 +152,8 @@ export class Event extends Component {
                 <Button color="red" className="icon" onClick={this.props.drop}>
                     <Icon name="delete"/>
                 </Button>
+
+
                 <br/>
                 <Dropdown clearable
                           placeholder='Event type'

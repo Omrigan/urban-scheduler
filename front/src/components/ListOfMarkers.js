@@ -30,7 +30,7 @@ const MyMarkersList = ({schedule}) => {
     const items = markers.map(({key, ...props}) => (
         <MyPopupMarker key={key} {...props} />
     ));
-    return <Fragment>{items}</Fragment>
+    return items
 };
 
 export default class ListOfMarkers extends Component<> {

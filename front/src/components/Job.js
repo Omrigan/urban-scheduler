@@ -2,20 +2,18 @@ import {Event} from "./Event";
 // import {Button} from "reactstrap";
 import {Button, Label, Icon} from "semantic-ui-react";
 import React, {Component} from 'react';
-import {getCities, getOptions, OptionsContext, CenterContext, postJob} from "../lib/api";
+import {getCities, getOptions, postJob} from "../lib/api";
+import {OptionsContext, CenterContext} from "../lib/api";
 import update from 'immutability-helper';
 import Config from "./Config";
 import {saveEventStates, loadEventStates} from "../lib/localstorageManager";
 import {safeLoad, safeDump} from "js-yaml"
+import ContainerEvent from "./ContainerEvent";
 
 
-const startEvents = 0;
-
-function get_empty() {
-    return {type: null};
+function empty_container() {
+    return {items: []}
 }
-
-const pureState = [...Array(startEvents)].map(() => (get_empty()));
 
 export class Job extends Component {
 
@@ -24,7 +22,7 @@ export class Job extends Component {
         super(props);
 
         this.state = {
-            eventStates: [],
+            eventContainer: empty_container(),
             options: {},
             config: {
                 routingBackend: "dummy",
@@ -56,46 +54,26 @@ export class Job extends Component {
 
         getCities(this.setState.bind(this));
 
-        this.addEvent = this.addEvent.bind(this);
     }
 
-
-    eventChanged = (key, newContent, erase) => {
-        // this.setState({
-        //     eventStates: this.state.eventStates.map((x, i) =>
-        //         (i === key ? Object.assign(x, newContent) : x))
-        // });
+    eventChanged = (newContent) => {
         this.setState((state) => {
-            const myobj = {};
-            if (erase) {
-                myobj[key] = {$set: newContent};
-            } else {
-                myobj[key] = {$merge: newContent};
+            return  {
+                eventContainer: newContent
             }
-
-            return update(state, {
-                eventStates: myobj
-            })
         });
-
-
     };
+
     onChangeConfig = (newConfig) => {
         this.setState((state) =>
             ({config: update(state.config, {$merge: newConfig})}))
-    };
-
-    addEvent = () => {
-        this.setState(state => ({
-            eventStates: state.eventStates.concat([get_empty()])
-        }))
     };
 
 
     send = () => {
         this.props.startPredict();
         const job = {
-            ordered_events: this.state.eventStates,
+            ordered_events: this.state.eventContainer.items,
             config: this.state.config
         };
         postJob(job, this.props.updateResult);
@@ -104,7 +82,7 @@ export class Job extends Component {
 
     exportProblemFile = () => {
         const element = document.createElement("a");
-        const file = new Blob([safeDump(this.state.eventStates)], {type: 'plain/text'});
+        const file = new Blob([safeDump(this.state.eventContainer)], {type: 'plain/text'});
         element.href = URL.createObjectURL(file);
         element.download = "problem.yaml";
         document.body.appendChild(element); // Required for this to work in FireFox
@@ -120,18 +98,18 @@ export class Job extends Component {
             let contents = safeLoad(e.target.result);
             console.log(contents);
             // Display file content
-            this.setState({eventStates: contents.ordered_events})
+            this.setState({eventContainer: {items: contents.ordered_events}})
         };
         reader.readAsText(file);
     };
 
 
     clear = () => {
-        this.setState({eventStates: pureState})
+        this.setState({eventContainer: empty_container()})
     };
 
     save = () => {
-        saveEventStates(this.state.eventStates);
+        saveEventStates(this.state.eventContainer);
         this.props.saveResult();
     };
 
@@ -143,44 +121,8 @@ export class Job extends Component {
         }
     };
 
-    down = (key) => {
-        this.setState(state => {
-            if ((key+1)== state.eventStates.length) {
-                return state;
-            }
-            const head = state.eventStates.slice(0, key);
-            const tail = state.eventStates.slice(key + 2, state.eventStates.length);
-            const result = head.concat([state.eventStates[key + 1],
-                state.eventStates[key]]).concat(tail);
-            return {
-                eventStates: result
-            };
-        })
-    };
-    up = (key) => {
-        this.setState(state => {
-            if (key==0) {
-                return state;
-            }
-            const head = state.eventStates.slice(0, key-1);
-            const tail = state.eventStates.slice(key + 1, state.eventStates.length);
-            const result = head.concat([state.eventStates[key],
-                state.eventStates[key-1]]).concat(tail);
-
-            return {
-                eventStates: result
-            };
-        })
-    };
-    drop = (key) => {
-        this.setState(state => {
-            return {
-                eventStates: state.eventStates.filter((value, idx) =>  (idx !=key))
-            };
-        })
-    };
-
     render() {
+        console.log("context", OptionsContext);
         return (
             <div className="">
                 <Config onChangeConfig={this.onChangeConfig}
@@ -195,11 +137,7 @@ export class Job extends Component {
                         onClick={this.clear}>Clear</Button>
                 <Button color='purple'
                         onClick={this.exportProblemFile}>Export</Button>
-                <Button
-                    as="label"
-                    basic
-                    htmlFor="upload"
-                >
+                <Button as="label" basic htmlFor="upload">
                     Import
                     <input onChange={this.importProblemFile}
                            hidden
@@ -210,15 +148,8 @@ export class Job extends Component {
                 </Button>
                 <CenterContext.Provider value={this.getCenter()}>
                     <OptionsContext.Provider value={this.state.options}>
-                        {this.state.eventStates.map((x, i) =>
-                            <Event key={i.toString()}
-                                   event={x}
-                                   down={this.down.bind(this, i)}
-                                   up={this.up.bind(this, i)}
-                                   drop={this.drop.bind(this, i)}
-                                   onChange={this.eventChanged.bind(this, i)}/>
-                        )} <br/>
-
+                        <ContainerEvent onChange={this.eventChanged}
+                                        event={this.state.eventContainer}/>
                     </OptionsContext.Provider>
                 </CenterContext.Provider>
             </div>

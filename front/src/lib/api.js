@@ -3,6 +3,7 @@ import {BACKEND_URL} from './settings'
 import React from 'react';
 import update from 'immutability-helper';
 
+
 const fetchCallback = (setState, result) => {
     const categoriesList = result.data.map((x, i) =>
         ({
@@ -28,9 +29,7 @@ const fetchCallback = (setState, result) => {
 };
 
 export const OptionsContext = React.createContext({});
-
 export const CenterContext = React.createContext([0, 0]);
-
 
 export const getOptions = (setState) => {
     return axios.get(BACKEND_URL + '/get_params').then((result) => fetchCallback(setState, result));
