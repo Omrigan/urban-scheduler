@@ -147,9 +147,10 @@ pub struct Config {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Solution {
-    pub schedule: Vec<MyPoint>,
+    schedule: Vec<MyPoint>,
     pub full_route: Option<Vec<(f64, f64)>>,
-    pub center: (f64, f64)
+    center: (f64, f64),
+    config: Config,
 }
 
 
@@ -203,17 +204,25 @@ pub fn normalize_problem(problem: PublicProblem) -> Problem {
     }
 }
 
-pub fn solve(problem: &Problem) -> Option<Solution> {
-    let mut solution = match problem.config.solve_algorithm {
-        SolveAlgorithm::Stupid => solve_stupid(problem),
-        SolveAlgorithm::Ordered => solve_ordered(problem),
-        SolveAlgorithm::Generic => solve_generic(problem)?,
+pub type Schedule = Vec<MyPoint>;
+
+pub fn solve(problem: Problem) -> Option<Solution> {
+    let mut schedule = match problem.config.solve_algorithm {
+        SolveAlgorithm::Stupid => solve_stupid(&problem),
+        SolveAlgorithm::Ordered => solve_ordered(&problem),
+        SolveAlgorithm::Generic => solve_generic(&problem)?,
     };
 
-    if problem.config.find_final_route {
-        solution.full_route = get_full_route(&solution.schedule);
-    }
-    Some(solution)
+    let full_route = if problem.config.find_final_route {
+        get_full_route(&schedule)
+    } else {None};
+
+    Some(Solution {
+        schedule,
+        center: (55.7494539, 37.62160470000001),
+        full_route,
+        config: problem.config
+    })
 }
 
 

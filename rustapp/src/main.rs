@@ -53,7 +53,7 @@ fn not_found(req: &Request) -> Json<Error> {
 fn predict_raw(problem_raw: Json<PublicProblem>) -> Result<Json<Solution>, Json<Error>> {
     let problem = problem_raw;
     let normalized_problem = normalize_problem(problem.into_inner());
-    let solution = solve(&normalized_problem);
+    let solution = solve(normalized_problem);
     match solution {
     Some(x) => Ok(Json(x)),
         None => Err(Json(Error {

@@ -1,5 +1,5 @@
 use crate::distances::{DistanceMatrix, AnswersMatrix, squash_distances, calculate_distance};
-use crate::problem::{Problem, Solution};
+use crate::problem::{Problem, Solution, Schedule};
 
 use bit_set::BitSet;
 use ndarray_stats::QuantileExt;
@@ -87,13 +87,9 @@ impl<'s> SearchTree<'s> {
                            &self.problem.events[to].points)
     }
 
-    fn recover_answer(&self) -> Option<Solution> {
+    fn recover_answer(&self) -> Option<Schedule> {
         let node = self.best?;
-        let mut result = Solution {
-            schedule: Vec::with_capacity(self.problem.events.len()),
-            full_route: None,
-            center: (55.7494539, 37.62160470000001)
-        };
+        let mut result = Vec::with_capacity(self.problem.events.len());
 
         let last_dists = node.meta.last_distances.as_ref();
 
@@ -130,7 +126,7 @@ impl<'s> SearchTree<'s> {
 
         for (event_idx, point_idx) in reverted_schedule_events.iter().zip(
             reverted_schedule_points.iter()).rev() {
-            result.schedule.push(self.problem.events[*event_idx].points[*point_idx].clone());
+            result.push(self.problem.events[*event_idx].points[*point_idx].clone());
         }
 
         Some(result)
@@ -177,7 +173,7 @@ impl PartialEq for Node<'_> {
 
 impl Eq for Node<'_> {}
 
-pub fn solve_generic(problem: &Problem) -> Option<Solution> {
+pub fn solve_generic(problem: &Problem) -> Option<Schedule> {
     let mut st = SearchTree {
         problem,
         heap: BinaryHeap::new(),

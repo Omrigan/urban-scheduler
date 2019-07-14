@@ -3,7 +3,7 @@ use ndarray_stats::QuantileExt;
 
 use crate::distances::{MyPoint, DistanceMatrix, AnswersMatrix,
                        calculate_distance, squash_distances};
-use crate::problem::{Event, Problem, Solution};
+use crate::problem::{Event, Problem, Solution, Schedule};
 
 
 fn sample_any(event: &Event) -> &MyPoint {
@@ -11,17 +11,13 @@ fn sample_any(event: &Event) -> &MyPoint {
     event.points.choose(&mut rng).unwrap()
 }
 
-pub fn solve_ordered(p: &Problem) -> Solution {
-    let mut result = Solution {
-        schedule: Vec::with_capacity(p.events.len()),
-        full_route: None,
-        center: (55.7494539, 37.62160470000001)
-    };
+pub fn solve_ordered(p: &Problem) -> Schedule {
+    let mut result = Vec::with_capacity(p.events.len());
     if p.events.len() == 0 {
         return result;
     }
     if p.events.len() == 1 {
-        result.schedule.push(sample_any(&p.events[0]).clone());
+        result.push(sample_any(&p.events[0]).clone());
         return result;
     }
 
@@ -64,24 +60,21 @@ pub fn solve_ordered(p: &Problem) -> Solution {
     reverted_schedule_idxs.push(start);
 
     for (idx, schedule_item) in reverted_schedule_idxs.iter().rev().enumerate() {
-        result.schedule.push(p.events[idx].points[*schedule_item].clone());
+        result.push(p.events[idx].points[*schedule_item].clone());
     }
 
     result
 }
 
 
-pub fn solve_stupid(p: &Problem) -> Solution {
+pub fn solve_stupid(p: &Problem) -> Schedule {
     let mut schedule = Vec::with_capacity(p.events.len());
 
     for event in p.events.iter() {
         schedule.push(event.points[0].clone());
     }
-    Solution {
-        schedule,
-        full_route: None,
-        center: (55.7494539, 37.62160470000001)
-    }
+
+    schedule
 }
 
 
