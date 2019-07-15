@@ -1,5 +1,5 @@
 use crate::distances::{DistanceMatrix, AnswersMatrix, squash_distances, calculate_distance};
-use crate::problem::{Problem, Solution, Schedule};
+use crate::problem::{Problem, Solution, Schedule, ScheduleItem};
 
 use bit_set::BitSet;
 use ndarray_stats::QuantileExt;
@@ -87,7 +87,7 @@ impl<'s> SearchTree<'s> {
                            &self.problem.events[to].points)
     }
 
-    fn recover_answer(&self) -> Option<Schedule> {
+    fn recover_answer(&self) -> Option<Vec<ScheduleItem>> {
         let node = self.best?;
         let mut result = Vec::with_capacity(self.problem.events.len());
 
@@ -126,7 +126,8 @@ impl<'s> SearchTree<'s> {
 
         for (event_idx, point_idx) in reverted_schedule_events.iter().zip(
             reverted_schedule_points.iter()).rev() {
-            result.push(self.problem.events[*event_idx].points[*point_idx].clone());
+            let event= &self.problem.events[*event_idx];
+            result.push(ScheduleItem::construct(event, event.points[*point_idx].clone()));
         }
 
         Some(result)
@@ -173,7 +174,7 @@ impl PartialEq for Node<'_> {
 
 impl Eq for Node<'_> {}
 
-pub fn solve_generic(problem: &Problem) -> Option<Schedule> {
+pub fn solve_generic(problem: &Problem) -> Option<Vec<ScheduleItem>> {
     let mut st = SearchTree {
         problem,
         heap: BinaryHeap::new(),
@@ -231,6 +232,7 @@ mod tests {
                 coords: (1f64, 2f64),
             }],
             before: vec![1usize].into_iter().collect(),
+            name: None
         };
 
         let sample_event2 = Event {
@@ -240,6 +242,7 @@ mod tests {
                 coords: (1f64, 2f64),
             }],
             before: BitSet::new(),
+            name: None
         };
 
         let p = Problem {
@@ -262,6 +265,7 @@ mod tests {
                 coords: (1f64, 2f64),
             }],
             before: vec![1usize].into_iter().collect(),
+            name: None
         };
 
         let sample_event2 = Event {
@@ -271,6 +275,7 @@ mod tests {
                 coords: (1f64, 2f64),
             }],
             before: vec![0usize].into_iter().collect(),
+            name: None
         };
 
         let p = Problem {

@@ -4,7 +4,8 @@ use serde::{Serialize, Deserialize};
 use crate::distances::{MyPoint, DistsMethod};
 use crate::solve_ordered::{solve_stupid, solve_ordered};
 use crate::solve_generic::solve_generic;
-use crate::final_route::get_full_route;
+use crate::final_route::get_final_route;
+use rand::{thread_rng, seq::SliceRandom};
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -20,11 +21,12 @@ pub struct PointsEvent {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FixedPlaceEvent {
-    location: Location
+    location: Location,
+    name: Option<String>,
 }
 
 impl FixedPlaceEvent {
-    fn into_points(self) -> Vec<MyPoint> {
+    fn into_points(&self) -> Vec<MyPoint> {
         vec![MyPoint {
             coords: (self.location.lat, self.location.lng),
             idx: 0,
@@ -58,11 +60,12 @@ pub enum PublicEvent {
     Sequential(SequentialEvent),
 }
 
-fn wrap_points(points: Vec<MyPoint>, idx: usize) -> Vec<Event> {
+fn wrap_points(points: Vec<MyPoint>, idx: usize, name: Option<String>) -> Vec<Event> {
     vec![Event {
         points,
         idx,
         before: BitSet::new(),
+        name
     }]
 }
 
@@ -76,7 +79,7 @@ fn process_container(public_events: Vec<PublicEvent>, idx_offset: usize, is_sequ
 
         if is_sequential {
             for event in sub_events.iter_mut() {
-                event.before.union(&bs);
+                event.before.union_with(&bs);
             }
         }
         bs.insert(global_idx);
@@ -90,9 +93,9 @@ impl PublicEvent {
     fn into_events(self, idx_offset: usize) -> Vec<Event> {
         let events = match self {
             PublicEvent::Points(event) =>
-                wrap_points(event.points, idx_offset),
+                wrap_points(event.points, idx_offset, None),
             PublicEvent::FixedPlace(event) =>
-                wrap_points(event.into_points(), idx_offset),
+                wrap_points(event.into_points(), idx_offset, event.name),
             PublicEvent::Category(event) => panic!(),
             PublicEvent::Sequential(event) =>
                 process_container(event.items, idx_offset, true),
@@ -117,6 +120,7 @@ pub struct Event {
     pub idx: usize,
     pub points: Vec<MyPoint>,
     pub before: BitSet,
+    name: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -144,11 +148,26 @@ pub struct Config {
     final_route: bool,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ScheduleItem {
+    #[serde(flatten)]
+    point: MyPoint,
+    name: Option<String>,
+}
+
+impl ScheduleItem {
+    pub fn construct(e: &Event, point: MyPoint) -> Self {
+        ScheduleItem {
+            point,
+            name: e.name.clone(),
+        }
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Solution {
-    schedule: Vec<MyPoint>,
-    pub full_route: Option<Vec<(f64, f64)>>,
+    schedule: Vec<ScheduleItem>,
+    pub final_route: Option<Vec<(f64, f64)>>,
     center: (f64, f64),
     config: Config,
 }
@@ -175,6 +194,7 @@ fn normalize_legacy(public_events: Vec<PublicEvent>) -> Vec<Event> {
             idx: i,
             points: points.points,
             before: bs.clone(),
+            name: None,
         });
         bs.insert(i);
     }
@@ -204,27 +224,42 @@ pub fn normalize_problem(problem: PublicProblem) -> Problem {
     }
 }
 
+fn sample_any(event: &Event) -> &MyPoint {
+    let mut rng = thread_rng();
+    event.points.choose(&mut rng).unwrap()
+}
+
 pub type Schedule = Vec<MyPoint>;
 
 pub fn solve(problem: Problem) -> Option<Solution> {
-    let mut schedule = match problem.config.solve_algorithm {
-        SolveAlgorithm::Stupid => solve_stupid(&problem),
-        SolveAlgorithm::Ordered => solve_ordered(&problem),
-        SolveAlgorithm::Generic => solve_generic(&problem)?,
+    let mut schedule = if problem.events.len() == 0 {
+        Vec::new()
+    } else if problem.events.len() == 1 {
+        let event = &problem.events[0];
+        vec![ScheduleItem::construct(event, sample_any(&event).clone())]
+    } else {
+        match problem.config.solve_algorithm {
+            SolveAlgorithm::Stupid => solve_stupid(&problem),
+            SolveAlgorithm::Ordered => solve_ordered(&problem),
+            SolveAlgorithm::Generic => solve_generic(&problem)?,
+        }
     };
 
-    let full_route = if problem.config.final_route {
-        match get_full_route(&schedule) {
+    let points_vec: Vec<MyPoint> =
+        schedule.iter().map(|item| item.point).collect(); // TODO: rewrite
+
+    let final_route = if problem.config.final_route {
+        match get_final_route(&points_vec) {
             Ok(route) => Some(route),
             Err(_) => None
         }
-    } else {None};
+    } else { None };
 
     Some(Solution {
         schedule,
         center: (55.7494539, 37.62160470000001),
-        full_route,
-        config: problem.config
+        final_route,
+        config: problem.config,
     })
 }
 

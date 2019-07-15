@@ -6,7 +6,7 @@ const SHAPE: &str = "shape";
 //fn parse_string(value: &str) -> (f64, f64) {
 //    split(",")
 //}
-pub fn get_full_route(schedule: &Vec<MyPoint>) -> Result<Vec<(f64, f64)>> {
+pub fn get_final_route(schedule: &Vec<MyPoint>) -> Result<Vec<(f64, f64)>> {
     let route = calculate_route_here(schedule, SHAPE)?;
     let arr = route["shape"].as_array().unwrap();
     let it = arr.iter().map(|value|
@@ -30,8 +30,8 @@ mod tests {
         }];
 
 
-        let full_route = get_full_route(&schedule).unwrap();
-        println!("{:?}", full_route);
-        assert!(full_route.len()>0);
+        let final_route = get_final_route(&schedule).unwrap();
+        println!("{:?}", final_route);
+        assert!(final_route.len()>0);
     }
 }
