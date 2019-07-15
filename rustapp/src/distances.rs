@@ -6,7 +6,7 @@ use ndarray_stats::QuantileExt;
 use geo::Point;
 use geo::prelude::*;
 
-
+use crate::error::{Result};
 use reqwest;
 //use std::collections::HashMap;
 
@@ -43,6 +43,7 @@ pub type AnswersMatrix = Array2<usize>;
 
 
 use std::env;
+use serde_json::ser::State::Rest;
 
 
 impl Default for DistsMethod {
@@ -69,9 +70,9 @@ fn calculate_distance_euclid(p1: MyPoint, p2: MyPoint) -> Distance {
 
 const SUMMARY: &str = "summary";
 
-pub fn calculate_route_here(points: &[MyPoint], route_attributes: &str) -> serde_json::Value {
-    let here_app_id = env::var("HERE_APP_ID").unwrap();
-    let here_app_code = env::var("HERE_APP_CODE").unwrap();
+pub fn calculate_route_here(points: &[MyPoint], route_attributes: &str) -> Result<serde_json::Value> {
+    let here_app_id = env::var("HERE_APP_ID")?;
+    let here_app_code = env::var("HERE_APP_CODE")?;
 
     let waypoint_part: Vec<String> = points.iter().enumerate().map(
         |(i, p)| format!("waypoint{}=geo!{}", i, p.get_string_repr())).collect();
@@ -85,13 +86,13 @@ pub fn calculate_route_here(points: &[MyPoint], route_attributes: &str) -> serde
     let client = reqwest::Client::new();
     let response = client.get(url).header("Referer", "https://urbanscheduler.ml").send();
 
-    let result: serde_json::Value = response.unwrap().json().unwrap();
+    let result: serde_json::Value = response?.json()?;
     println!("{:#}", result);
-    return result["response"]["route"][0].clone();
+    Ok(result["response"]["route"][0].clone())
 }
 
 fn calculate_distance_here(p1: MyPoint, p2: MyPoint) -> Distance {
-    let route = calculate_route_here(&[p1, p2], SUMMARY);
+    let route = calculate_route_here(&[p1, p2], SUMMARY).unwrap();
     let travel_time = route["summary"]["travelTime"].as_f64().unwrap();
 
     travel_time

@@ -55,6 +55,8 @@ export const postProblem = (data, updateResult, updateError) => {
         .then((response) => updateResult(response.data))
         .catch((error) => {
             console.log(error);
-            updateError(error.response && error.response.data)
+            if (error.response) {
+                updateError(error.response && error.response.data)
+            }
         });
 };

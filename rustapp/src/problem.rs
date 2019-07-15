@@ -141,7 +141,7 @@ pub struct Config {
     #[serde(default)]
     solve_algorithm: SolveAlgorithm,
     #[serde(default)]
-    find_final_route: bool,
+    final_route: bool,
 }
 
 
@@ -213,8 +213,11 @@ pub fn solve(problem: Problem) -> Option<Solution> {
         SolveAlgorithm::Generic => solve_generic(&problem)?,
     };
 
-    let full_route = if problem.config.find_final_route {
-        get_full_route(&schedule)
+    let full_route = if problem.config.final_route {
+        match get_full_route(&schedule) {
+            Ok(route) => Some(route),
+            Err(_) => None
+        }
     } else {None};
 
     Some(Solution {

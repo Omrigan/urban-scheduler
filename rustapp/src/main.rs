@@ -7,7 +7,7 @@ extern crate scan_fmt;
 
 
 use crate::problem::{PublicProblem, Solution, normalize_problem, solve};
-
+use crate::error::{Error};
 use rocket_contrib::json::{Json};
 use rocket::{Rocket, Request};
 use rocket::config::{Config, Environment};
@@ -20,14 +20,9 @@ mod solve_generic;
 mod distances;
 mod final_route;
 mod problem;
+mod error;
 //mod test_performance;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Error {
-    error_name: &'static str,
-    error_code: usize,
-    error_message: &'static str
-}
 
 #[catch(500)]
 fn internal_error() -> Json<Error> {

@@ -42,8 +42,8 @@ def predict():
     data = request.get_json()
     if data.get("version") == 2:
         result = requests.post(RUST_URL, json=data)
-
-        return (result.text, result.status_code)
+        print("Proxy result:", result.text, flush=True)
+        return result.text, result.status_code
 
     ordered_events = data.get("ordered_events")
     job = Predictor(data.get('config'))

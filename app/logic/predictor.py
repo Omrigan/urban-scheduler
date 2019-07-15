@@ -33,7 +33,7 @@ def normalize_config(config):
         raise InvalidCity(city)
 
     result["city"] = city
-    result['dists_method'] = config.get('routingBackend') or 'dummy'
+    result['dists_method'] = config.get('dists_method') or 'dummy'
     result["solver"] = config.get("solver") or "python"
     alg = config.get("solve_algorithm")
     if alg:

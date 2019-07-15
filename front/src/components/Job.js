@@ -26,10 +26,12 @@ export class Job extends Component {
             eventContainer: empty_container(),
             options: {},
             config: {
-                routingBackend: "dummy",
+                dists_method: "dummy",
                 clipping: null,
                 solver: "rust",
-                city: "moscow"
+                solve_algorithm: "ordered",
+                city: "moscow",
+                final_route: false
             },
             cities: [{
                 text: 'moscow',
@@ -95,21 +97,14 @@ export class Job extends Component {
     };
 
 
-    legacySend = () => {
-        const noLegacy = this.state.eventContainer.items.some((event) =>
-            (event.type === "parallel" || event.type === "sequential"));
-        if (noLegacy) {
-            this.props.updateError({error_message: "No nested events!"})
-        }
-
-        this.props.startPredict();
-        const problem = this.getProblem(1);
-        postProblem(problem, this.props.updateResult, this.props.updateError);
-    };
 
     send = () => {
         this.props.startPredict();
-        const problem = this.getProblem(defaultProblemVersion);
+        let version = defaultProblemVersion;
+        if(this.state.config.solver !== "rust"){
+            version = 1
+        }
+        const problem = this.getProblem(version);
         postProblem(problem, this.props.updateResult, this.props.updateError);
     };
 
@@ -144,12 +139,11 @@ export class Job extends Component {
     render() {
         return (
             <div className="">
-                <Config onChangeConfig={this.changeConfig}
+                <Config changeConfig={this.changeConfig}
                         config={this.state.config}
                         cities={this.state.cities}/>
 
                 <Button color='green' onClick={this.send}>Send</Button>
-                <Button color='yellow' onClick={this.legacySend}>Legacy send</Button>
                 <AddButton onChange={this.changeContainer}
                            event={this.state.eventContainer}/>
                 <br/><br/>

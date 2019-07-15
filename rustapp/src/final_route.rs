@@ -1,17 +1,17 @@
 use crate::distances::{MyPoint, calculate_route_here};
-
+use crate::error::Result;
 const SHAPE: &str = "shape";
 
 
 //fn parse_string(value: &str) -> (f64, f64) {
 //    split(",")
 //}
-pub fn get_full_route(schedule: &Vec<MyPoint>) -> Option<Vec<(f64, f64)>> {
-    let route = calculate_route_here(schedule, SHAPE);
-    let arr = route["shape"].as_array()?;
+pub fn get_full_route(schedule: &Vec<MyPoint>) -> Result<Vec<(f64, f64)>> {
+    let route = calculate_route_here(schedule, SHAPE)?;
+    let arr = route["shape"].as_array().unwrap();
     let it = arr.iter().map(|value|
         scan_fmt!(value.as_str().unwrap(),"{},{}", f64, f64)).map(|(x, y)| (x.unwrap(), y.unwrap()));
-    Some(it.collect())
+    Ok(it.collect())
 }
 
 #[cfg(test)]
