@@ -17,7 +17,8 @@ while true; do
   cargo build  --target=x86_64-unknown-linux-musl
   cargo run --target=x86_64-unknown-linux-musl &
   PID=$!
-  sleep 5
+  sleep 3
   inotifywait -e modify -e move -e create -e delete -e attrib -r `pwd`
+  sleep 3
   kill $PID
 done

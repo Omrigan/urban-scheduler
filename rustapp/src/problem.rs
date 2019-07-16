@@ -6,6 +6,13 @@ use crate::solve_ordered::{solve_stupid, solve_ordered};
 use crate::solve_generic::solve_generic;
 use crate::final_route::get_final_route;
 use rand::{thread_rng, seq::SliceRandom};
+use crate::LocalState;
+
+use rocket::State;
+use mongodb::coll::Collection;
+use mongodb::ordered::OrderedDocument;
+use itertools::Itertools;
+use bson;
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -38,6 +45,11 @@ impl FixedPlaceEvent {
 pub struct CategoryEvent {
     category: String,
     brand: Option<String>,
+
+}
+
+impl CategoryEvent {
+    fn into_events(self, idx: usize) {}
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -65,17 +77,18 @@ fn wrap_points(points: Vec<MyPoint>, idx: usize, name: Option<String>) -> Vec<Ev
         points,
         idx,
         before: BitSet::new(),
-        name
+        name,
     }]
 }
 
-fn process_container(public_events: Vec<PublicEvent>, idx_offset: usize, is_sequential: bool) -> Vec<Event> {
+fn process_container(public_events: Vec<PublicEvent>, idx_offset: usize,
+                     places_collection: &Collection, is_sequential: bool) -> Vec<Event> {
     let mut bs = BitSet::new();
     let mut events = Vec::new();
 
     for (idx, event) in public_events.into_iter().enumerate() {
         let global_idx = idx_offset + idx;
-        let mut sub_events = event.into_events(global_idx);
+        let mut sub_events = event.into_events(global_idx, places_collection);
 
         if is_sequential {
             for event in sub_events.iter_mut() {
@@ -89,18 +102,46 @@ fn process_container(public_events: Vec<PublicEvent>, idx_offset: usize, is_sequ
     return events;
 }
 
+fn parse_schedule_item(doc: OrderedDocument) -> MyPoint {
+    let location_doc = doc.get_document("location").unwrap();
+    let location: Location = bson::from_bson(bson::Bson::from(location_doc.to_owned())).unwrap();
+    MyPoint {
+        coords: (location.lat, location.lng),
+        idx: 0,
+    }
+}
+
+fn resolve_category(event: CategoryEvent, idx: usize, places_collection: &Collection) -> Vec<Event> {
+    let mut filter = doc! {
+    "categories": &event.category
+    };
+    match event.brand {
+        Some(brand) => { filter.insert("brand", brand); }
+        None => ()
+    };
+    dbg!(&filter);
+    dbg!(places_collection.count(None, None));
+
+
+    let points:Vec<MyPoint> = places_collection.find(Some(filter), None).unwrap().filter_map(Result::ok).map(parse_schedule_item).collect();
+    assert!(points.len()!=0);
+
+    wrap_points(points, idx, Some(event.category))
+}
+
 impl PublicEvent {
-    fn into_events(self, idx_offset: usize) -> Vec<Event> {
+    fn into_events(self, idx_offset: usize, places_collection: &Collection) -> Vec<Event> {
         let events = match self {
             PublicEvent::Points(event) =>
                 wrap_points(event.points, idx_offset, None),
             PublicEvent::FixedPlace(event) =>
                 wrap_points(event.into_points(), idx_offset, event.name),
-            PublicEvent::Category(event) => panic!(),
+            PublicEvent::Category(event) => resolve_category(event,
+                                                             idx_offset, places_collection),
             PublicEvent::Sequential(event) =>
-                process_container(event.items, idx_offset, true),
+                process_container(event.items, idx_offset, places_collection, true),
             PublicEvent::Parallel(event) =>
-                process_container(event.items, idx_offset, false),
+                process_container(event.items, idx_offset, places_collection, false),
         };
         return events;
     }
@@ -201,19 +242,20 @@ fn normalize_legacy(public_events: Vec<PublicEvent>) -> Vec<Event> {
     events
 }
 
-fn normalize_events(public_events: Vec<PublicEvent>) -> Vec<Event> {
-    let mut events = process_container(public_events, 0, true);
+fn normalize_events(public_events: Vec<PublicEvent>, places_collection: &Collection) -> Vec<Event> {
+    let mut events = process_container(public_events, 0,
+                                       places_collection, true);
     for (idx, event) in events.iter_mut().enumerate() {
         assert_eq!(event.idx, idx)
     }
     events
 }
 
-pub fn normalize_problem(problem: PublicProblem) -> Problem {
+pub fn normalize_problem(problem: PublicProblem, places_collection: &Collection) -> Problem {
     let events = if problem.version == 1 {
         normalize_legacy(problem.events)
     } else {
-        normalize_events(problem.events)
+        normalize_events(problem.events, places_collection)
     };
 
 

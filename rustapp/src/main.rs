@@ -4,14 +4,22 @@
 extern crate rocket;
 #[macro_use]
 extern crate scan_fmt;
+#[macro_use]
+extern crate mongodb;
 
+//use mongodb;
+use mongodb::ThreadedClient;
+use mongodb::db::ThreadedDatabase;
+use mongodb::coll::Collection;
 
 use crate::problem::{PublicProblem, Solution, normalize_problem, solve};
-use crate::error::{Error};
-use rocket_contrib::json::{Json};
+use crate::error::Error;
+use rocket_contrib::json::Json;
 use rocket::{Rocket, Request};
 use rocket::config::{Config, Environment};
 use rocket::response::Responder;
+use rocket::State;
+
 
 use serde::{Serialize, Deserialize};
 
@@ -30,42 +38,58 @@ fn internal_error() -> Json<Error> {
     Json(Error {
         error_name: "Unknown error",
         error_code: 500,
-        error_message: "Oops"
+        error_message: "Oops",
     })
 }
 
 #[catch(404)]
 fn not_found(req: &Request) -> Json<Error> {
-      Json(Error {
+    Json(Error {
         error_name: "Not found",
         error_code: 404,
-        error_message: "Oops"
+        error_message: "Oops",
     })
 }
 
 
 #[post("/predict_raw", format = "json", data = "<problem_raw>")]
-fn predict_raw(problem_raw: Json<PublicProblem>) -> Result<Json<Solution>, Json<Error>> {
+fn predict_raw(problem_raw: Json<PublicProblem>, state: State<LocalState>)
+               -> Result<Json<Solution>, Json<Error>> {
     let problem = problem_raw;
-    let normalized_problem = normalize_problem(problem.into_inner());
+    let normalized_problem = normalize_problem(problem.into_inner(),
+                                               &state.places);
     let solution = solve(normalized_problem);
     match solution {
-    Some(x) => Ok(Json(x)),
+        Some(x) => Ok(Json(x)),
         None => Err(Json(Error {
             error_name: "Solver error",
             error_code: 32,
-            error_message: "Oops"
+            error_message: "Oops",
         }))
     }
 }
 
 
+pub struct LocalState {
+    pub places: Collection
+}
+
+impl LocalState {
+    fn init_state() -> Self {
+        let places = mongodb::Client::connect("mongo", 27017)
+            .expect("Failed to initialize client.").db("cityday").collection("places");
+        LocalState {
+            places
+        }
+    }
+}
+
 fn rocket() -> Rocket {
     let config = Config::build(Environment::Staging)
-    .address("0.0.0.0").port(80).finalize()
+        .address("0.0.0.0").port(80).finalize()
         .unwrap();
 
-    rocket::custom(config).mount("/", routes![predict_raw])
+    rocket::custom(config).manage(LocalState::init_state()).mount("/", routes![predict_raw])
 }
 
 fn main() {
@@ -94,6 +118,5 @@ mod tests {
 
         assert_eq!(response.status(), Status::Ok);
         let response_text = response.body().unwrap().into_string().unwrap();
-
     }
 }
