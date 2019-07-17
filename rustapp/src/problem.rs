@@ -87,7 +87,7 @@ fn process_container(public_events: Vec<PublicEvent>, idx_offset: usize,
     let mut bs = BitSet::new();
     let mut events = Vec::new();
 
-    let global_idx = idx_offset;
+    let mut global_idx = idx_offset;
     for (idx, event) in public_events.into_iter().enumerate() {
         let mut sub_events = event.into_events(global_idx, places_collection);
 
@@ -100,6 +100,7 @@ fn process_container(public_events: Vec<PublicEvent>, idx_offset: usize,
             global_idx+=1;
             bs.insert(global_idx);
         }
+        dbg!(global_idx);
         events.append(&mut sub_events);
     }
 
