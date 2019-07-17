@@ -13,6 +13,7 @@ use mongodb::coll::Collection;
 use mongodb::ordered::OrderedDocument;
 use itertools::Itertools;
 use bson;
+use std::str;
 
 
 #[derive(Debug, Serialize, Deserialize)]
