@@ -51,8 +51,8 @@ export class Job extends Component {
                 options: options,
             });
         }).then(() =>
-	    const problem = loadProblem();
-	    if(problem) {
+             const problem = loadProblem();
+             if(problem) {
 	    	this.setProblem(problem);
 	    }
         );
