@@ -105,7 +105,11 @@ fn process_container(public_events: Vec<PublicEvent>, idx_offset: usize,
 fn parse_schedule_item(doc: OrderedDocument) -> MyPoint {
     let location_doc = doc.get_document("location").unwrap();
     dbg!(&location_doc);
-    let location: Location = bson::from_bson(bson::Bson::from(location_doc.to_owned())).unwrap();
+    let location = Location {
+        lat: doc.get_str("lat").unwrap().parse().unwrap(),
+        lng: doc.get_f64("lng").unwrap().parse().unwrap()
+    };
+    //let location: Location = bson::from_bson(bson::Bson::from(location_doc.to_owned())).unwrap();
     MyPoint {
         coords: (location.lat, location.lng),
         idx: 0,
