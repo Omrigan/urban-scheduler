@@ -97,8 +97,8 @@ fn process_container(public_events: Vec<PublicEvent>, idx_offset: usize,
             }
         }
         for (idx, elem) in sub_events.iter().enumerate() {
-            global_idx+=1;
             bs.insert(global_idx);
+            global_idx+=1;
         }
         dbg!(global_idx);
         events.append(&mut sub_events);
