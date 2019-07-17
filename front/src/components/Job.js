@@ -50,12 +50,12 @@ export class Job extends Component {
             this.setState({
                 options: options,
             });
-        }).then(() =>
+        }).then(() => {
              const problem = loadProblem();
              if(problem) {
 	    	this.setProblem(problem);
 	    }
-        );
+	});
 
 
         getCities(this.setState.bind(this));
