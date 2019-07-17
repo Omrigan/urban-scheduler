@@ -108,7 +108,7 @@ fn parse_schedule_item(doc: OrderedDocument) -> MyPoint {
     dbg!(&location_doc);
     let location = Location {
         lat: doc.get_str("lat").unwrap().parse::<f64>().unwrap(),
-        lng: doc.get_f64("lng").unwrap().parse::<f64>().unwrap()
+        lng: doc.get_str("lng").unwrap().parse::<f64>().unwrap()
     };
     //let location: Location = bson::from_bson(bson::Bson::from(location_doc.to_owned())).unwrap();
     MyPoint {
