@@ -51,7 +51,10 @@ export class Job extends Component {
                 options: options,
             });
         }).then(() =>
-            this.setProblem(loadProblem() || empty_container())
+	    const problem = loadProblem();
+	    if(problem) {
+	    	this.setProblem(problem);
+	    }
         );
 
 
