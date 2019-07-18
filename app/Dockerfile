@@ -8,7 +8,6 @@ RUN pip install -r /app/requirements.txt
 
 
 ENV NGINX_MAX_UPLOAD 0
-ENV UWSGI_CHEAPER 1
 
 COPY start-dev.sh /start-dev.sh
 RUN chmod +x /start-dev.sh
