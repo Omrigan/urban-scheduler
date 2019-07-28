@@ -5,11 +5,12 @@ use std::result;
 use reqwest;
 
 use serde::{Serialize, Deserialize};
+use std::fmt::Display;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Error {
     pub error_name: &'static str,
-    pub error_code: usize,
-    pub error_message: &'static str,
+    pub error_message: Option<String>,
 }
 
 impl error::Error for Error {
@@ -20,28 +21,39 @@ impl error::Error for Error {
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.error_message)
+        match &self.error_message {
+            Some(mess) => write!(f, "{}: {}", self.error_name, mess),
+            None => write!(f, "{}", self.error_name)
+        }
     }
 }
 
+impl Error {
+    pub fn fmt<T: Display>(name: &'static str, info: T) -> Self {
+        let err = Error {
+            error_name: name,
+            error_message: Some(format!("{}", info)),
+        };
+        println!("{}", err);
+        err
+    }
+}
+
+pub const UNKNOWN_ERROR: Error = Error {
+    error_name: "Unknown",
+    error_message: None
+};
+
 impl std::convert::From<reqwest::Error> for Error {
-    fn from(_: reqwest::Error) -> Self {
-        Error {
-            error_name: "unk",
-            error_code: 0,
-            error_message: "unk",
-        }
+    fn from(err: reqwest::Error) -> Self {
+        Error::fmt("Reqwest", err)
     }
 }
 
 
 impl std::convert::From<std::env::VarError> for Error {
-    fn from(_: std::env::VarError) -> Self {
-        Error {
-            error_name: "unk",
-            error_code: 0,
-            error_message: "unk",
-        }
+    fn from(err: std::env::VarError) -> Self {
+        Error::fmt("Unknown", err)
     }
 }
 
@@ -55,7 +67,6 @@ impl std::convert::From<std::env::VarError> for Error {
 //    }
 //}
 
-//
 //impl std::convert::From<std::option::NoneError> for Error {
 //    fn from(_: std::option::NoneError) -> Self {
 //        Error {

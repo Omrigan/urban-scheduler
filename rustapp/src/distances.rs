@@ -87,8 +87,8 @@ pub fn calculate_route_here(points: &[MyPoint], route_attributes: &str) -> Resul
     let response = client.get(url).header("Referer", "https://urbanscheduler.ml").send();
 
     let result: serde_json::Value = response?.json()?;
-    println!("{:#}", result);
-    Ok(result["response"]["route"][0].clone())
+    let value_present = &result["response"]["route"][0];
+    Ok(value_present.clone())
 }
 
 fn calculate_distance_here(p1: MyPoint, p2: MyPoint) -> Distance {

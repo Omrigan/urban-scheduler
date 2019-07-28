@@ -37,18 +37,13 @@ fn internal_error() -> Json<Error> {
     println!("Catcher 500");
     Json(Error {
         error_name: "Unknown error",
-        error_code: 500,
-        error_message: "Oops",
+        error_message: None,
     })
 }
 
 #[catch(404)]
 fn not_found(req: &Request) -> Json<Error> {
-    Json(Error {
-        error_name: "Not found",
-        error_code: 404,
-        error_message: "Oops",
-    })
+    Json(Error::fmt("NotFound", req))
 }
 
 
@@ -56,15 +51,14 @@ fn not_found(req: &Request) -> Json<Error> {
 fn predict_raw(problem_raw: Json<PublicProblem>, state: State<LocalState>)
                -> Result<Json<Solution>, Json<Error>> {
     let problem = problem_raw;
-    let normalized_problem = normalize_problem(problem.into_inner(),
+    let normalized_problem= normalize_problem(problem.into_inner(),
                                                &state.places);
     let solution = solve(normalized_problem);
     match solution {
         Some(x) => Ok(Json(x)),
         None => Err(Json(Error {
-            error_name: "Solver error",
-            error_code: 32,
-            error_message: "Oops",
+            error_name: "SolverError",
+            error_message: None,
         }))
     }
 }

@@ -130,11 +130,9 @@ fn resolve_category(event: CategoryEvent, idx: usize, places_collection: &Collec
         None => ()
     };
     dbg!(&filter);
-    dbg!(places_collection.count(None, None));
 
 
     let points:Vec<MyPoint> = places_collection.find(Some(filter), None).unwrap().filter_map(Result::ok).map(parse_schedule_item).collect();
-    assert!(points.len()!=0);
 
     wrap_points(points, idx, Some(event.category))
 }
