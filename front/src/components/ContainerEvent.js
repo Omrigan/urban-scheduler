@@ -9,9 +9,9 @@ export default class ContainerEvent extends Component {
     renderEvent = (subevent, idx) => {
         const event = <Event key={idx}
                              event={subevent}
-                             down={this.childDown.bind(idx)}
-            // up={this.childUp.bind(this, i)}
-                             drop={this.childDrop.bind(idx)}
+                             down={this.childDown.bind(this, idx)}
+                             up={this.childUp.bind(this, idx)}
+                             drop={this.childDrop.bind(this, idx)}
                              onChange={this.childUpdate.bind(this, idx)}/>;
         return event;
     };
@@ -45,31 +45,26 @@ export default class ContainerEvent extends Component {
         if ((key + 1) == items.length) {
             return;
         }
-        const head = items.slice(0, key);
-        const tail = items.slice(key + 2, items.length);
+        const head = items.slice(0, key) || [];
+        const tail = items.slice(key + 2, items.length) || [];
         const result = head.concat([items[key + 1], items[key]]).concat(tail);
-
-        this.propagateChanges(result);
+        console.log(result);
+        this.propagateChanges({$set: result});
     };
 
-    // childUp = (key) => {
-    //     this.setState(state => {
-    //         if (key == 0) {
-    //             return state;
-    //         }
-    //         const head = state.eventStates.slice(0, key - 1);
-    //         const tail = state.eventStates.slice(key + 1, state.eventStates.length);
-    //         const result = head.concat([state.eventStates[key],
-    //             state.eventStates[key - 1]]).concat(tail);
-    //
-    //         return {
-    //             eventStates: result
-    //         };
-    //     })
-    // };
+    childUp = (key) => {
+        if (key == 0) {
+            return;
+        }
+        this.childDown(key-1);
+    };
+
+
 
     childDrop = (key) => {
-        this.propagateChanges(this.props.event.items.filter((value, idx) => (idx != key)));
+        this.propagateChanges({
+            $set: this.props.event.items.filter((value, idx) => (idx != key))
+        });
     };
 
     childUpdate = (key, newContent, erase) => {

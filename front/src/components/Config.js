@@ -133,7 +133,8 @@ export default class Config extends Component {
                                                    fluid
                                                    defaultValue={this.props.config.clipping}
                                                    onChange={this.onClippingChange}/>
-            Enable final route: <Checkbox toggle onChange={this.onChangeFinalRoute}/>
+            Enable final route: <Checkbox fitted toggle onChange={this.onChangeFinalRoute}
+                                          checked={this.props.config.final_route}/>
         </div>)
     }
 }
