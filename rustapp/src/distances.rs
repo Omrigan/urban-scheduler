@@ -1,16 +1,15 @@
-use serde::{Serialize, Deserialize};
-//use geo::prelude::*;
+use crate::error::{Result};
 
+use std::env;
+
+use serde_json;
+use serde::{Serialize, Deserialize};
 use ndarray::{Array1, Array2};
 use ndarray_stats::QuantileExt;
 use geo::Point;
 use geo::prelude::*;
-
-use crate::error::{Result};
 use reqwest;
-//use std::collections::HashMap;
 
-use serde_json;
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct MyPoint {
@@ -41,9 +40,6 @@ pub type Distance = f64;
 pub type DistanceMatrix = Array2<Distance>;
 pub type AnswersMatrix = Array2<usize>;
 
-
-use std::env;
-use serde_json::ser::State::Rest;
 
 
 impl Default for DistsMethod {

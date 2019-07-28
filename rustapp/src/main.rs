@@ -7,21 +7,17 @@ extern crate scan_fmt;
 #[macro_use]
 extern crate mongodb;
 
+use crate::problem::{PublicProblem, Solution, normalize_problem, solve};
+use crate::error::Error;
+
 //use mongodb;
 use mongodb::ThreadedClient;
 use mongodb::db::ThreadedDatabase;
 use mongodb::coll::Collection;
-
-use crate::problem::{PublicProblem, Solution, normalize_problem, solve};
-use crate::error::Error;
 use rocket_contrib::json::Json;
 use rocket::{Rocket, Request};
 use rocket::config::{Config, Environment};
-use rocket::response::Responder;
 use rocket::State;
-
-
-use serde::{Serialize, Deserialize};
 
 mod solve_ordered;
 mod solve_generic;
@@ -107,7 +103,8 @@ mod tests {
         // Try to get a message with an ID that doesn't exist.
         let mut response = client.post("/predict_raw")
             .header(ContentType::JSON)
-            .body(r#"{"ordered_events":[{"idx":0,"points":[{"coords":[1.0,2.0],"idx":0}]}]}"#)
+            .body(r#"{"events":[{"idx":0,"type":"points","points":[{"coords":[1.0,2.0],"idx":0}]}],
+            "version":1}"#)
             .dispatch();
 
         assert_eq!(response.status(), Status::Ok);

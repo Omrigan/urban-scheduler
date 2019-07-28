@@ -1,5 +1,5 @@
 use crate::distances::{DistanceMatrix, AnswersMatrix, squash_distances, calculate_distance};
-use crate::problem::{Problem, Solution, Schedule, ScheduleItem};
+use crate::problem::{Problem, ScheduleItem};
 
 use bit_set::BitSet;
 use ndarray_stats::QuantileExt;
@@ -248,12 +248,13 @@ mod tests {
         let p = Problem {
             events: vec![sample_event, sample_event2],
             config: Config::default(),
+            version: 2
         };
         let result = solve_generic(&p).unwrap();
         dbg!(&result);
-        assert_eq!(result.schedule.len(), 2);
-        assert_eq!(result.schedule[0].idx, 1);
-        assert_eq!(result.schedule[1].idx, 0);
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].point.idx, 1);
+        assert_eq!(result[1].point.idx, 0);
     }
 
     #[test]
@@ -281,6 +282,7 @@ mod tests {
         let p = Problem {
             events: vec![sample_event, sample_event2],
             config: Config::default(),
+            version: 2
         };
         let result = solve_generic(&p);
         assert!(result.is_none());

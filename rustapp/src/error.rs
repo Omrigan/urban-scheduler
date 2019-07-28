@@ -1,6 +1,5 @@
 use std::fmt;
 use std::error;
-use std::io;
 use std::result;
 use reqwest;
 

@@ -1,8 +1,8 @@
 use ndarray_stats::QuantileExt;
 
-use crate::distances::{MyPoint, DistanceMatrix, AnswersMatrix,
+use crate::distances::{DistanceMatrix, AnswersMatrix,
                        calculate_distance, squash_distances};
-use crate::problem::{Event, Problem, Solution, Schedule, ScheduleItem};
+use crate::problem::{Problem, ScheduleItem};
 
 
 
@@ -71,7 +71,10 @@ pub fn solve_stupid(p: &Problem) -> Vec<ScheduleItem> {
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
-    use crate::problem::Config;
+
+    use crate::problem::{Config, Event};
+    use crate::distances::MyPoint;
+
     use bit_set::BitSet;
 
     fn get_sample_problem() -> Problem {
@@ -79,14 +82,26 @@ mod tests {
             idx: 0,
             coords: (1f64, 2f64),
         };
+        let sample_point = MyPoint {
+            idx: 2,
+            coords: (1f64, 2f64),
+        };
         let sample_event = Event {
             idx: 0,
             points: vec![sample_point],
             before: BitSet::new(),
+            name: None
+        };
+        let sample_event2 = Event {
+            idx: 1,
+            points: vec![sample_point],
+            before: BitSet::new(),
+            name: None
         };
         Problem {
-            events: vec![sample_event],
+            events: vec![sample_event, sample_event2],
             config: Config::default(),
+            version: 1
         }
     }
 
@@ -94,14 +109,14 @@ mod tests {
     #[test]
     fn test_sample_problem() {
         let p = get_sample_problem();
-        assert_eq!(p.events.len(), 1);
+        assert_eq!(p.events.len(), 2);
     }
 
     #[test]
     fn test_stupid_solution() {
         let p = get_sample_problem();
         let s = solve_stupid(&p);
-        assert_eq!(s.schedule.len(), p.events.len());
+        assert_eq!(s.len(), p.events.len());
     }
 
 
@@ -109,7 +124,7 @@ mod tests {
     fn test_ordered_solution() {
         let p = get_sample_problem();
         let s = solve_ordered(&p);
-        assert_eq!(s.schedule.len(), p.events.len());
+        assert_eq!(s.len(), p.events.len());
     }
 
     #[test]

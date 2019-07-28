@@ -6,12 +6,9 @@ use crate::solve_ordered::{solve_stupid, solve_ordered};
 use crate::solve_generic::solve_generic;
 use crate::final_route::get_final_route;
 use rand::{thread_rng, seq::SliceRandom};
-use crate::LocalState;
 
-use rocket::State;
 use mongodb::coll::Collection;
 use mongodb::ordered::OrderedDocument;
-use itertools::Itertools;
 use bson;
 use std::str;
 
@@ -49,10 +46,6 @@ pub struct CategoryEvent {
 
 }
 
-impl CategoryEvent {
-    fn into_events(self, idx: usize) {}
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SequentialEvent {
     items: Vec<PublicEvent>
@@ -88,7 +81,7 @@ fn process_container(public_events: Vec<PublicEvent>, idx_offset: usize,
     let mut events = Vec::new();
 
     let mut global_idx = idx_offset;
-    for (idx, event) in public_events.into_iter().enumerate() {
+    for event in public_events.into_iter() {
         let mut sub_events = event.into_events(global_idx, places_collection);
 
         if is_sequential {
@@ -96,9 +89,9 @@ fn process_container(public_events: Vec<PublicEvent>, idx_offset: usize,
                 event.before.union_with(&bs);
             }
         }
-        for (idx, elem) in sub_events.iter().enumerate() {
+        for _ in 0..sub_events.len() {
             bs.insert(global_idx);
-            global_idx+=1;
+            global_idx += 1;
         }
         dbg!(global_idx);
         events.append(&mut sub_events);
@@ -112,7 +105,7 @@ fn parse_schedule_item(doc: OrderedDocument) -> MyPoint {
     dbg!(&location_doc);
     let location = Location {
         lat: location_doc.get_str("lat").unwrap().parse::<f64>().unwrap(),
-        lng: location_doc.get_str("lng").unwrap().parse::<f64>().unwrap()
+        lng: location_doc.get_str("lng").unwrap().parse::<f64>().unwrap(),
     };
     //let location: Location = bson::from_bson(bson::Bson::from(location_doc.to_owned())).unwrap();
     MyPoint {
@@ -132,7 +125,7 @@ fn resolve_category(event: CategoryEvent, idx: usize, places_collection: &Collec
     dbg!(&filter);
 
 
-    let points:Vec<MyPoint> = places_collection.find(Some(filter), None).unwrap().filter_map(Result::ok).map(parse_schedule_item).collect();
+    let points: Vec<MyPoint> = places_collection.find(Some(filter), None).unwrap().filter_map(Result::ok).map(parse_schedule_item).collect();
 
     wrap_points(points, idx, Some(event.category))
 }
@@ -144,8 +137,8 @@ impl PublicEvent {
                 wrap_points(event.points, idx_offset, None),
             PublicEvent::FixedPlace(event) =>
                 wrap_points(event.into_points(), idx_offset, event.name),
-            PublicEvent::Category(event) => resolve_category(event,
-                                                             idx_offset, places_collection),
+            PublicEvent::Category(event) =>
+                resolve_category(event, idx_offset, places_collection),
             PublicEvent::Sequential(event) =>
                 process_container(event.items, idx_offset, places_collection, true),
             PublicEvent::Parallel(event) =>
@@ -169,7 +162,7 @@ pub struct Event {
     pub idx: usize,
     pub points: Vec<MyPoint>,
     pub before: BitSet,
-    name: Option<String>,
+    pub name: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -200,7 +193,7 @@ pub struct Config {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ScheduleItem {
     #[serde(flatten)]
-    point: MyPoint,
+    pub point: MyPoint,
     name: Option<String>,
 }
 
@@ -282,7 +275,7 @@ fn sample_any(event: &Event) -> &MyPoint {
 pub type Schedule = Vec<MyPoint>;
 
 pub fn solve(problem: Problem) -> Option<Solution> {
-    let mut schedule = if problem.events.len() == 0 {
+    let schedule = if problem.events.len() == 0 {
         Vec::new()
     } else if problem.events.len() == 1 {
         let event = &problem.events[0];
