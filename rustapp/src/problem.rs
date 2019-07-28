@@ -5,12 +5,14 @@ use crate::distances::{MyPoint, DistsMethod};
 use crate::solve_ordered::{solve_stupid, solve_ordered};
 use crate::solve_generic::solve_generic;
 use crate::final_route::get_final_route;
+use crate::error::{Error, Result};
 use rand::{thread_rng, seq::SliceRandom};
 
 use mongodb::coll::Collection;
 use mongodb::ordered::OrderedDocument;
 use bson;
 use std::str;
+use bson::Bson;
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -100,18 +102,27 @@ fn process_container(public_events: Vec<PublicEvent>, idx_offset: usize,
     return events;
 }
 
-fn parse_schedule_item(doc: OrderedDocument) -> MyPoint {
+fn parse_mongo_coord(coord: Option<&Bson>) -> Result<f64> {
+    coord.and_then(|bson| match bson {
+            Bson::FloatingPoint(value) => Some(value.clone()),
+            Bson::String(str) => str.parse().ok(),
+            _ => None
+        }
+    ).ok_or(Error::fmt("PointParse", coord))
+}
+
+fn parse_schedule_item(doc: OrderedDocument) -> Result<MyPoint> {
     let location_doc = doc.get_document("location").unwrap();
     dbg!(&location_doc);
     let location = Location {
-        lat: location_doc.get_str("lat").unwrap().parse::<f64>().unwrap(),
-        lng: location_doc.get_str("lng").unwrap().parse::<f64>().unwrap(),
+        lat: parse_mongo_coord(location_doc.get("lat"))?,
+        lng: parse_mongo_coord(location_doc.get("lng"))?
     };
     //let location: Location = bson::from_bson(bson::Bson::from(location_doc.to_owned())).unwrap();
-    MyPoint {
+    Ok(MyPoint {
         coords: (location.lat, location.lng),
         idx: 0,
-    }
+    })
 }
 
 fn resolve_category(event: CategoryEvent, idx: usize, places_collection: &Collection) -> Vec<Event> {
@@ -125,7 +136,10 @@ fn resolve_category(event: CategoryEvent, idx: usize, places_collection: &Collec
     dbg!(&filter);
 
 
-    let points: Vec<MyPoint> = places_collection.find(Some(filter), None).unwrap().filter_map(Result::ok).map(parse_schedule_item).collect();
+    let points: Vec<MyPoint> = places_collection.find(Some(filter), None).unwrap()
+        .filter_map(std::result::Result::ok)
+        .map(parse_schedule_item).filter_map(Result::ok)
+        .collect();
 
     wrap_points(points, idx, Some(event.category))
 }

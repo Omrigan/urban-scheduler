@@ -4,7 +4,7 @@ use std::result;
 use reqwest;
 
 use serde::{Serialize, Deserialize};
-use std::fmt::Display;
+use std::fmt::{Display, Debug};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Error {
@@ -28,12 +28,12 @@ impl fmt::Display for Error {
 }
 
 impl Error {
-    pub fn fmt<T: Display>(name: &'static str, info: T) -> Self {
+    pub fn fmt<T: Debug>(name: &'static str, info: T) -> Self {
         let err = Error {
             error_name: name,
-            error_message: Some(format!("{}", info)),
+            error_message: Some(format!("{:#?}", info)),
         };
-        println!("{}", err);
+        println!("{:#?}", err);
         err
     }
 }

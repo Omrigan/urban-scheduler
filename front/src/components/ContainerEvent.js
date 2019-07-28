@@ -22,7 +22,7 @@ export default class ContainerEvent extends Component {
         if (this.props.event.type === 'parallel') {
             const panes = this.props.event.items.map((subevent, idx) => (
                 {
-                    menuItem: idx.toString(),
+                    menuItem: subevent.name,
                     render: () => <Tab.Pane>
                         {this.renderEvent(subevent, idx)}
                     </Tab.Pane>

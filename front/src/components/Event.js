@@ -75,6 +75,8 @@ class CategoryEvent extends Component {
         const value = data.value;
         this.props.onChange({
             category: value,
+            brand: null,
+            name: value
         });
     };
 
@@ -82,6 +84,7 @@ class CategoryEvent extends Component {
         const value = data.value;
         this.props.onChange({
             brand: value,
+            name: value
         });
     };
 
@@ -145,7 +148,10 @@ export class Event extends Component {
 
     onChangeType = (e, data) => {
         const value = data.value;
-        let result = {type: value};
+        let result = {
+            type: value,
+            name: value
+        };
         if (value == 'sequential' || value == 'parallel') {
             result.items = this.props.event.items || [];
         }
