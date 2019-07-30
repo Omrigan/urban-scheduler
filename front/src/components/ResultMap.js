@@ -37,7 +37,7 @@ export default class ResultMap extends Component {
 
         const markers = this.props.schedule.map(item => new H.map.Marker({
             lat: item.coords[0],
-            lng: item.coords[1]
+            lng: item.coords[1],
         }));
         this.state.map.addObjects(markers);
 

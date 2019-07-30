@@ -45,17 +45,19 @@ impl FixedPlaceEvent {
 pub struct CategoryEvent {
     category: String,
     brand: Option<String>,
-
+    name: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SequentialEvent {
-    items: Vec<PublicEvent>
+    items: Vec<PublicEvent>,
+    name: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ParallelEvent {
-    items: Vec<PublicEvent>
+    items: Vec<PublicEvent>,
+    name: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -74,6 +76,7 @@ fn wrap_points(points: Vec<MyPoint>, idx: usize, name: Option<String>) -> Vec<Ev
         idx,
         before: BitSet::new(),
         name,
+        color: random_color()
     }]
 }
 
@@ -104,10 +107,10 @@ fn process_container(public_events: Vec<PublicEvent>, idx_offset: usize,
 
 fn parse_mongo_coord(coord: Option<&Bson>) -> Result<f64> {
     coord.and_then(|bson| match bson {
-            Bson::FloatingPoint(value) => Some(value.clone()),
-            Bson::String(str) => str.parse().ok(),
-            _ => None
-        }
+        Bson::FloatingPoint(value) => Some(value.clone()),
+        Bson::String(str) => str.parse().ok(),
+        _ => None
+    }
     ).ok_or(Error::fmt("PointParse", coord))
 }
 
@@ -116,7 +119,7 @@ fn parse_schedule_item(doc: OrderedDocument) -> Result<MyPoint> {
     dbg!(&location_doc);
     let location = Location {
         lat: parse_mongo_coord(location_doc.get("lat"))?,
-        lng: parse_mongo_coord(location_doc.get("lng"))?
+        lng: parse_mongo_coord(location_doc.get("lng"))?,
     };
     //let location: Location = bson::from_bson(bson::Bson::from(location_doc.to_owned())).unwrap();
     Ok(MyPoint {
@@ -125,11 +128,13 @@ fn parse_schedule_item(doc: OrderedDocument) -> Result<MyPoint> {
     })
 }
 
-fn resolve_category(event: CategoryEvent, idx: usize, places_collection: &Collection) -> Vec<Event> {
+fn resolve_category(event: CategoryEvent,
+                    idx: usize,
+                    places_collection: &Collection) -> Vec<Event> {
     let mut filter = doc! {
     "categories": &event.category
     };
-    match event.brand {
+    match &event.brand {
         Some(brand) => { filter.insert("brand", brand); }
         None => ()
     };
@@ -141,7 +146,9 @@ fn resolve_category(event: CategoryEvent, idx: usize, places_collection: &Collec
         .map(parse_schedule_item).filter_map(Result::ok)
         .collect();
 
-    wrap_points(points, idx, Some(event.category))
+    let name = event.name.or(event.brand).unwrap_or(event.category);
+
+    wrap_points(points, idx, Some(name))
 }
 
 impl PublicEvent {
@@ -177,6 +184,7 @@ pub struct Event {
     pub points: Vec<MyPoint>,
     pub before: BitSet,
     pub name: Option<String>,
+    pub color: u32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -208,17 +216,20 @@ pub struct Config {
 pub struct ScheduleItem {
     #[serde(flatten)]
     pub point: MyPoint,
-    name: Option<String>,
+    name: String,
+    color: u32
 }
 
 impl ScheduleItem {
     pub fn construct(e: &Event, point: MyPoint) -> Self {
         ScheduleItem {
             point,
-            name: e.name.clone(),
+            name: e.name.clone().unwrap_or(format!("Event #{}", e.idx)),
+            color: e.color
         }
     }
 }
+
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Solution {
@@ -236,6 +247,10 @@ pub struct Problem {
     pub config: Config,
 }
 
+fn random_color() -> u32 {
+    rand::random::<u32>() & 0xffffff
+}
+
 fn normalize_legacy(public_events: Vec<PublicEvent>) -> Vec<Event> {
     let mut events = Vec::new();
     let mut bs = BitSet::new();
@@ -251,6 +266,7 @@ fn normalize_legacy(public_events: Vec<PublicEvent>) -> Vec<Event> {
             points: points.points,
             before: bs.clone(),
             name: None,
+            color: random_color(),
         });
         bs.insert(i);
     }

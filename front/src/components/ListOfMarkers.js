@@ -13,21 +13,14 @@ L.Icon.Default.mergeOptions({
 });
 
 const MyPopupMarker = ({content, position}) => (
-    <Marker position={position}>
+    <Marker color="#ff00ff" position={position}>
         <Popup>{content}</Popup>
     </Marker>
 );
 
 const MyMarkersList = ({schedule}) => {
-    const markers = schedule.map((x, i) => ({
-        key: i,
-        name: i,
-        position: x["coords"],
-        content: x["brand"]
-    }));
-
-    const items = markers.map(({key, ...props}) => (
-        <MyPopupMarker key={key} {...props} />
+    const items = schedule.map((x, i) => (
+        <MyPopupMarker key={i} position={x["coords"]} content={x["name"]} />
     ));
     return items
 };
