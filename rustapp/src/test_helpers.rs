@@ -71,7 +71,7 @@ pub fn sample_ordered() -> Problem {
         idx: 0,
         coords: (1f64, 2f64),
     };
-    let sample_point = MyPoint {
+    let sample_point2 = MyPoint {
         idx: 2,
         coords: (1f64, 2f64),
     };
@@ -84,7 +84,7 @@ pub fn sample_ordered() -> Problem {
     };
     let sample_event2 = Event {
         idx: 1,
-        points: vec![sample_point],
+        points: vec![sample_point2],
         before: BitSet::new(),
         name: None,
         color: 0

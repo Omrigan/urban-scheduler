@@ -16,7 +16,7 @@ fn prepare_distances_file(id: &str, p: &Problem) -> Result<()> {
             let last_dists = calculate_distance(p.config.dists_method, &x.points, &y.points);
             for ((p1, p2), dist) in last_dists.indexed_iter() {
                 file.write_fmt(format_args!("{} {} {}\n",
-                                            x.points[p1].idx, x.points[p2].idx, dist));
+                                            x.points[p1].idx, x.points[p2].idx, dist))?;
             }
         }
     }
@@ -31,14 +31,14 @@ fn format_scip_set<A: ToString, I: Iterator<Item=A>>(it: I) -> String {
 fn prepare_main_file(id: &str, p: &Problem) -> Result<()> {
     let mut file = File::create(format!("/tmp/{}/main.opt", id))?;
 
-    let mut E_idx = format_scip_set(0..p.events.len());
-    let mut E = Vec::new();
+    let input_events_idxes= format_scip_set(0..p.events.len());
+    let mut input_events= Vec::new();
     for (idx, event) in p.events.iter().enumerate() {
         let set = format_scip_set(event.points.iter().map(|pt| pt.idx));
-        E.push(format!("<{}> {}", idx, set));
+        input_events.push(format!("<{}> {}", idx, set));
     }
     file.write_fmt(format_args!(include_str!("opt/template.zimpl"),
-                                id = id, E_idx = E_idx, E = E.iter().format(",\n")))?;
+                                id = id, E_idx = input_events_idxes, E = input_events.iter().format(",\n")))?;
     Ok(())
 }
 
@@ -63,7 +63,7 @@ fn run_solution(id: &str) -> Result<String> {
 }
 
 
-pub fn solve_opt(problem: &Problem) -> Option<Vec<ScheduleItem>> {
+pub fn solve_opt(problem: &Problem) -> Result<Vec<ScheduleItem>> {
     let id: String = thread_rng()
         .sample_iter(&Alphanumeric)
         .take(64)
@@ -71,14 +71,14 @@ pub fn solve_opt(problem: &Problem) -> Option<Vec<ScheduleItem>> {
 
     dbg!(&id);
 
-    std::fs::create_dir(format!("/tmp/{}", &id));
+    std::fs::create_dir(format!("/tmp/{}", &id))?;
 
-    prepare_distances_file(&id, problem);
-    prepare_main_file(&id, problem);
+    prepare_distances_file(&id, problem)?;
+    prepare_main_file(&id, problem)?;
 
-    let mut text_solution = run_solution(&id);
+    let  text_solution = run_solution(&id)?;
 
-    None
+    panic!()
 }
 
 #[cfg(test)]
