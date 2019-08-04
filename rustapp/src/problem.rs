@@ -71,10 +71,9 @@ pub enum PublicEvent {
     Sequential(SequentialEvent),
 }
 
-fn wrap_points(points: Vec<MyPoint>, idx: usize, name: Option<String>) -> Vec<Event> {
+fn wrap_points(points: Vec<MyPoint>, name: Option<String>) -> Vec<Event> {
     vec![Event {
         points,
-        idx,
         before: BitSet::new(),
         name,
         color: random_color(),
@@ -130,7 +129,6 @@ fn parse_schedule_item(doc: OrderedDocument) -> Result<MyPoint> {
 }
 
 fn resolve_category(event: CategoryEvent,
-                    idx: usize,
                     places_collection: &Collection) -> Vec<Event> {
     let mut filter = doc! {
     "categories": &event.category
@@ -149,18 +147,18 @@ fn resolve_category(event: CategoryEvent,
 
     let name = event.name.or(event.brand).unwrap_or(event.category);
 
-    wrap_points(points, idx, Some(name))
+    wrap_points(points, Some(name))
 }
 
 impl PublicEvent {
     fn into_events(self, idx_offset: usize, places_collection: &Collection) -> Vec<Event> {
         let events = match self {
             PublicEvent::Points(event) =>
-                wrap_points(event.points, idx_offset, None),
+                wrap_points(event.points, None),
             PublicEvent::FixedPlace(event) =>
-                wrap_points(event.into_points(), idx_offset, event.name),
+                wrap_points(event.into_points(), event.name),
             PublicEvent::Category(event) =>
-                resolve_category(event, idx_offset, places_collection),
+                resolve_category(event,  places_collection),
             PublicEvent::Sequential(event) =>
                 process_container(event.items, idx_offset, places_collection, true),
             PublicEvent::Parallel(event) =>
@@ -181,7 +179,6 @@ pub struct PublicProblem {
 
 #[derive(Debug)]
 pub struct Event {
-    pub idx: usize,
     pub points: Vec<MyPoint>,
     pub before: BitSet,
     pub name: Option<String>,
@@ -225,7 +222,7 @@ impl ScheduleItem {
     pub fn construct(e: &Event, point: MyPoint) -> Self {
         ScheduleItem {
             point,
-            name: e.name.clone().unwrap_or(format!("Event #{}", e.idx)),
+            name: e.name.clone().unwrap_or("Event ?".to_string()),
             color: e.color,
         }
     }
@@ -263,7 +260,6 @@ fn normalize_legacy(public_events: Vec<PublicEvent>) -> Vec<Event> {
         };
 
         events.push(Event {
-            idx: i,
             points: points.points,
             before: bs.clone(),
             name: None,
@@ -275,11 +271,8 @@ fn normalize_legacy(public_events: Vec<PublicEvent>) -> Vec<Event> {
 }
 
 fn normalize_events(public_events: Vec<PublicEvent>, places_collection: &Collection) -> Vec<Event> {
-    let mut events = process_container(public_events, 0,
+    let events = process_container(public_events, 0,
                                        places_collection, true);
-    for (idx, event) in events.iter_mut().enumerate() {
-        assert_eq!(event.idx, idx)
-    }
     events
 }
 

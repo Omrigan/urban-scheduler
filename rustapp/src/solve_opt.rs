@@ -9,7 +9,7 @@ use std::string::ToString;
 use itertools::Itertools;
 use std::process::Command;
 
-fn prepare_distances_file(id: &str, p: &Problem) -> Result<()> {
+fn prepare_distances_file(id: &str, p: &Problem, zpoint: usize) -> Result<()> {
     let mut file = File::create(format!("/tmp/{}/dists.dat", id))?;
     for pairs in p.events.windows(2) {
         if let [x, y] = pairs {
@@ -20,6 +20,15 @@ fn prepare_distances_file(id: &str, p: &Problem) -> Result<()> {
             }
         }
     }
+
+    for event in p.events.iter() {
+        for point in event.points.iter() {
+            file.write_fmt(format_args!("{} {} {}\n",
+                                        point.idx, zpoint, 0))?;
+        }
+    }
+
+
     Ok(())
 }
 
@@ -28,40 +37,105 @@ fn format_scip_set<A: ToString, I: Iterator<Item=A>>(it: I) -> String {
 }
 
 
-fn prepare_main_file(id: &str, p: &Problem) -> Result<()> {
-    let mut file = File::create(format!("/tmp/{}/main.opt", id))?;
-
-    let input_events_idxes= format_scip_set(0..p.events.len());
-    let mut input_events= Vec::new();
+fn prepare_main_file(id: &str, p: &Problem) -> Result<(usize, usize)> {
+    let mut file = File::create(format!("/tmp/{}/main.zimpl", id))?;
+    let zevent = p.events.len();
+    let input_events_idxes = format_scip_set(0..(p.events.len() + 1));
+    let mut input_events = Vec::new();
+    let mut input_events_prev = Vec::new();
+    let mut zpoint = 0usize;
     for (idx, event) in p.events.iter().enumerate() {
-        let set = format_scip_set(event.points.iter().map(|pt| pt.idx));
-        input_events.push(format!("<{}> {}", idx, set));
+        let points_idxes = event.points.iter().map(|pt| pt.idx);
+        let points_set = format_scip_set(points_idxes.clone());
+        input_events.push(format!("<{}> {}", idx, points_set));
+
+        let prev_set = format_scip_set(event.before.iter());
+        input_events_prev.push(format!("<{}> {}", idx, prev_set));
+
+        zpoint = zpoint.max(points_idxes.max().unwrap_or(0));
     }
+    zpoint += 1;
+
+    input_events.push(format!("<{}> {{{}}}", zevent, zpoint));
+    input_events_prev.push(format!("<{}> {}", zevent, format_scip_set(0..(p.events.len()))));
+
     file.write_fmt(format_args!(include_str!("opt/template.zimpl"),
-                                id = id, E_idx = input_events_idxes, E = input_events.iter().format(",\n")))?;
-    Ok(())
+                                id = id,
+                                E_idx = input_events_idxes,
+                                E = input_events.iter().format(",\n"),
+                                E_prev = input_events_prev.iter().format(",\n")))?;
+    Ok((zevent, zpoint))
 }
 
 fn run_solution(id: &str) -> Result<String> {
-    let output = Command::new("opt")
-        .arg(format!("/tmp/{}/main.opt", id))
-        .current_dir(format!("/tmp/{}", id))
-        .output()?;
-
-    let output = Command::new("scip")
-        .arg("-c")
-        .arg("read main.lp optimize write solution main.sol quit")
+    let output = Command::new("zimpl")
+        .arg(format!("/tmp/{}/main.zimpl", id))
         .current_dir(format!("/tmp/{}", id))
         .output()?;
 
     dbg!(&output);
-    let mut result_file= File::open(format!("/tmp/{}/main.sol", id))?;
-    let mut result= String::new();
+
+    let output = Command::new("scip")
+        .arg("-c")
+        .arg("read main.lp set limits time 1 optimize write solution main.sol quit")
+        .current_dir(format!("/tmp/{}", id))
+        .output()?;
+
+    dbg!(&output);
+    let mut result_file = File::open(format!("/tmp/{}/main.sol", id))?;
+    let mut result = String::new();
     result_file.read_to_string(&mut result)?;
 
     Ok(result)
 }
 
+fn recover_answer(text_solution: String, p: &Problem, zevent: usize, zpoint: usize) -> Result<Vec<ScheduleItem>> {
+    let mut next = vec![0usize; zevent + 1];
+    let mut selected = vec![false; zevent + 1];
+
+    let mut solution_status = true;
+    for line in text_solution.split('\n') {
+        let terms: Vec<&str> = line.split_whitespace().collect();
+        dbg!(&terms);
+        if terms.len() > 0 {
+            if terms[0] == "solution" {
+                solution_status = terms[2] == "optimal";
+                if !solution_status {
+                    return Err(UNKNOWN_ERROR);
+                }
+            }
+            let var_terms: Vec<&str> = terms[0].split('#').collect();
+
+            if var_terms[0] == "x" {
+                let from: usize = var_terms[1].parse()?;
+                let to: usize = var_terms[2].parse()?;
+                next[from] = to;
+            } else if var_terms[0] == "y" {
+                let pt: usize = var_terms[1].parse()?;
+                selected[pt] = true;
+            }
+        }
+    }
+
+    let mut order = Vec::new();
+    let mut cur_event = next[zevent];
+    while cur_event != zevent {
+        order.push(cur_event);
+        cur_event = next[cur_event];
+    }
+
+    let mut result: Vec<ScheduleItem> = Vec::new();
+    for cur_event in order {
+        let event = &p.events[cur_event];
+        for pt in event.points.iter() {
+            if selected[pt.idx] {
+                result.push(ScheduleItem::construct(event, *pt));
+            }
+        }
+    }
+
+    Ok(result)
+}
 
 pub fn solve_opt(problem: &Problem) -> Result<Vec<ScheduleItem>> {
     let id: String = thread_rng()
@@ -73,12 +147,17 @@ pub fn solve_opt(problem: &Problem) -> Result<Vec<ScheduleItem>> {
 
     std::fs::create_dir(format!("/tmp/{}", &id))?;
 
-    prepare_distances_file(&id, problem)?;
-    prepare_main_file(&id, problem)?;
+    let (zevent, zpoint) = prepare_main_file(&id, problem)?;
 
-    let  text_solution = run_solution(&id)?;
+    prepare_distances_file(&id, problem, zpoint)?;
 
-    panic!()
+    let text_solution = run_solution(&id)?;
+
+    println!("{}", &text_solution);
+
+    let solution = recover_answer(text_solution, problem, zevent, zpoint);
+
+    solution
 }
 
 #[cfg(test)]
@@ -103,6 +182,6 @@ mod tests {
         let p = incorrect_generic();
 
         let result = solve_opt(&p);
-        assert!(result.is_none());
+        assert!(result.is_err());
     }
 }

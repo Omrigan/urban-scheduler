@@ -14,7 +14,7 @@ use reqwest;
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct MyPoint {
     pub coords: (f64, f64),
-    pub idx: u64
+    pub idx: usize
 }
 
 impl MyPoint {

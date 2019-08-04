@@ -186,12 +186,12 @@ pub fn solve_generic(problem: &Problem) -> Result<Vec<ScheduleItem>> {
     };
     let mut roots = Vec::new();
 
-    for event in problem.events.iter() {
+    for (idx, event) in problem.events.iter().enumerate() {
         if event.before.is_empty() {
             let mut bs = BitSet::new();
-            bs.insert(event.idx as usize);
+            bs.insert(idx);
             let meta = Meta {
-                event_idx: event.idx as usize,
+                event_idx: idx,
                 last_distances: None,
                 parent: None,
                 last_answers: None,
@@ -240,6 +240,6 @@ mod tests {
     fn test_incorrect() {
         let p = incorrect_generic();
         let result = solve_generic(&p);
-        assert!(result.is_none());
+        assert!(result.is_err());
     }
 }
