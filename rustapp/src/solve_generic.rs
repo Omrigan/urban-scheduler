@@ -126,7 +126,7 @@ impl<'s> SearchTree<'s> {
 
         for (event_idx, point_idx) in reverted_schedule_events.iter().zip(
             reverted_schedule_points.iter()).rev() {
-            let event= &self.problem.events[*event_idx];
+            let event = &self.problem.events[*event_idx];
             result.push(ScheduleItem::construct(event, event.points[*point_idx].clone()));
         }
 
@@ -220,36 +220,12 @@ pub fn solve_generic(problem: &Problem) -> Option<Vec<ScheduleItem>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::distances::MyPoint;
-    use crate::problem::{Event, Config};
+    use crate::test_helpers::*;
+
 
     #[test]
     fn test_search() {
-        let sample_event = Event {
-            idx: 0,
-            points: vec![MyPoint {
-                idx: 0,
-                coords: (1f64, 2f64),
-            }],
-            before: vec![1usize].into_iter().collect(),
-            name: None
-        };
-
-        let sample_event2 = Event {
-            idx: 1,
-            points: vec![MyPoint {
-                idx: 1,
-                coords: (1f64, 2f64),
-            }],
-            before: BitSet::new(),
-            name: None
-        };
-
-        let p = Problem {
-            events: vec![sample_event, sample_event2],
-            config: Config::default(),
-            version: 2
-        };
+        let p = sample_generic();
         let result = solve_generic(&p).unwrap();
         dbg!(&result);
         assert_eq!(result.len(), 2);
@@ -259,31 +235,7 @@ mod tests {
 
     #[test]
     fn test_incorrect() {
-        let sample_event = Event {
-            idx: 0,
-            points: vec![MyPoint {
-                idx: 0,
-                coords: (1f64, 2f64),
-            }],
-            before: vec![1usize].into_iter().collect(),
-            name: None
-        };
-
-        let sample_event2 = Event {
-            idx: 1,
-            points: vec![MyPoint {
-                idx: 1,
-                coords: (1f64, 2f64),
-            }],
-            before: vec![0usize].into_iter().collect(),
-            name: None
-        };
-
-        let p = Problem {
-            events: vec![sample_event, sample_event2],
-            config: Config::default(),
-            version: 2
-        };
+        let p = incorrect_generic();
         let result = solve_generic(&p);
         assert!(result.is_none());
     }

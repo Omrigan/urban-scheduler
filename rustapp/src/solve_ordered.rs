@@ -69,52 +69,24 @@ pub fn solve_stupid(p: &Problem) -> Vec<ScheduleItem> {
 
 #[cfg(test)]
 mod tests {
-    // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
+    use crate::test_helpers::*;
 
     use crate::problem::{Config, Event};
     use crate::distances::MyPoint;
 
     use bit_set::BitSet;
 
-    fn get_sample_problem() -> Problem {
-        let sample_point = MyPoint {
-            idx: 0,
-            coords: (1f64, 2f64),
-        };
-        let sample_point = MyPoint {
-            idx: 2,
-            coords: (1f64, 2f64),
-        };
-        let sample_event = Event {
-            idx: 0,
-            points: vec![sample_point],
-            before: BitSet::new(),
-            name: None
-        };
-        let sample_event2 = Event {
-            idx: 1,
-            points: vec![sample_point],
-            before: BitSet::new(),
-            name: None
-        };
-        Problem {
-            events: vec![sample_event, sample_event2],
-            config: Config::default(),
-            version: 1
-        }
-    }
-
 
     #[test]
     fn test_sample_problem() {
-        let p = get_sample_problem();
+        let p = sample_ordered();
         assert_eq!(p.events.len(), 2);
     }
 
     #[test]
     fn test_stupid_solution() {
-        let p = get_sample_problem();
+        let p = sample_ordered();
         let s = solve_stupid(&p);
         assert_eq!(s.len(), p.events.len());
     }
@@ -122,7 +94,7 @@ mod tests {
 
     #[test]
     fn test_ordered_solution() {
-        let p = get_sample_problem();
+        let p = sample_ordered();
         let s = solve_ordered(&p);
         assert_eq!(s.len(), p.events.len());
     }

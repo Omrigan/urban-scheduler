@@ -56,6 +56,14 @@ impl std::convert::From<std::env::VarError> for Error {
     }
 }
 
+
+impl std::convert::From<std::io::Error> for Error {
+    fn from(err: std::io::Error) -> Self {
+        Error::fmt("IO", err)
+    }
+}
+
+
 //impl std::convert::From<url::parser::ParseError> for Error {
 //    fn from(_: url::parser::ParseError) -> Self {
 //        Error {

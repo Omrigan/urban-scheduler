@@ -13,6 +13,7 @@ use mongodb::ordered::OrderedDocument;
 use bson;
 use std::str;
 use bson::Bson;
+use std::collections::HashSet;
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -76,7 +77,7 @@ fn wrap_points(points: Vec<MyPoint>, idx: usize, name: Option<String>) -> Vec<Ev
         idx,
         before: BitSet::new(),
         name,
-        color: random_color()
+        color: random_color(),
     }]
 }
 
@@ -217,7 +218,7 @@ pub struct ScheduleItem {
     #[serde(flatten)]
     pub point: MyPoint,
     name: String,
-    color: u32
+    color: u32,
 }
 
 impl ScheduleItem {
@@ -225,7 +226,7 @@ impl ScheduleItem {
         ScheduleItem {
             point,
             name: e.name.clone().unwrap_or(format!("Event #{}", e.idx)),
-            color: e.color
+            color: e.color,
         }
     }
 }
@@ -282,7 +283,23 @@ fn normalize_events(public_events: Vec<PublicEvent>, places_collection: &Collect
     events
 }
 
-pub fn normalize_problem(problem: PublicProblem, places_collection: &Collection) -> Problem {
+fn validate_problem(problem: &Problem) -> Result<()> {
+    let mut problem_idxes = HashSet::new();
+    for event in &problem.events {
+        for point in &event.points {
+            let idx = point.idx;
+            if problem_idxes.contains(&idx) {
+                return Err(Error::fmt("Validation",
+                                      format!("Point {} is present twice", idx)));
+            } else {
+                problem_idxes.insert(idx);
+            }
+        }
+    }
+    Ok(())
+}
+
+pub fn normalize_problem(problem: PublicProblem, places_collection: &Collection) -> Result<Problem> {
     let events = if problem.version == 1 {
         normalize_legacy(problem.events)
     } else {
@@ -290,11 +307,14 @@ pub fn normalize_problem(problem: PublicProblem, places_collection: &Collection)
     };
 
 
-    Problem {
+    let problem = Problem {
         version: problem.version,
         config: problem.config,
         events,
-    }
+    };
+    validate_problem(&problem)?;
+
+    Ok(problem)
 }
 
 fn sample_any(event: &Event) -> &MyPoint {
@@ -336,48 +356,3 @@ pub fn solve(problem: Problem) -> Option<Solution> {
     })
 }
 
-
-//
-//impl Serialize for BitSet
-//{
-//    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-//        where
-//            S: Serializer,
-//    {
-//        let mut seq = serializer.serialize_seq(Some(self.len()))?;
-//        for e in self {
-//            seq.serialize_element(e)?;
-//        }
-//        seq.end()
-//    }
-//}
-//
-//pub trait Deserialize<'de>: Sized {
-//    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-//        where
-//            D: Deserializer<'de> {
-//        deserializer.deserialize_seq(BitSetVisitor)
-//    }
-//}
-//
-//
-////impl Deserialize for
-//
-//
-//struct BitSetVisitor;
-//
-//impl<'de> Visitor<'de> for BitSetVisitor {
-//    type Value = BitSet;
-//
-//    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-//        formatter.write_str("usize array")
-//    }
-//    fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error> where
-//        A: SeqAccess<'de> {
-//        let mut result = BitSet::new();
-//        while let elem = seq.next_element()?{
-//            result.insert(elem);
-//        }
-//        Ok(result)
-//    }
-//}

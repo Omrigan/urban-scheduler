@@ -25,6 +25,8 @@ mod distances;
 mod final_route;
 mod problem;
 mod error;
+mod solve_opt;
+mod test_helpers;
 //mod test_performance;
 
 
@@ -44,18 +46,21 @@ fn not_found(req: &Request) -> Json<Error> {
 
 
 #[post("/predict_raw", format = "json", data = "<problem_raw>")]
-fn predict_raw(problem_raw: Json<PublicProblem>, state: State<LocalState>)
-               -> Result<Json<Solution>, Json<Error>> {
+fn predict_raw(problem_raw: Json<PublicProblem>, state: State<LocalState>) -> Json<error::Result<Solution>> {
+    Json(do_predict_raw(problem_raw.into_inner(), state))
+}
+
+fn do_predict_raw(problem_raw: PublicProblem, state: State<LocalState>) -> error::Result<Solution> {
     let problem = problem_raw;
-    let normalized_problem= normalize_problem(problem.into_inner(),
-                                               &state.places);
+    let normalized_problem = normalize_problem(problem,
+                                               &state.places)?;
     let solution = solve(normalized_problem);
     match solution {
-        Some(x) => Ok(Json(x)),
-        None => Err(Json(Error {
-            error_name: "SolverError",
+        Some(x) => Ok(x),
+        None => Err(Error {
+            error_name: "Solver",
             error_message: None,
-        }))
+        })
     }
 }
 
