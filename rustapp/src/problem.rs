@@ -324,7 +324,7 @@ fn sample_any(event: &Event) -> &MyPoint {
 
 pub type Schedule = Vec<MyPoint>;
 
-pub fn solve(problem: Problem) -> Option<Solution> {
+pub fn solve(problem: Problem) -> Result<Solution> {
     let schedule = if problem.events.len() == 0 {
         Vec::new()
     } else if problem.events.len() == 1 {
@@ -348,7 +348,7 @@ pub fn solve(problem: Problem) -> Option<Solution> {
         }
     } else { None };
 
-    Some(Solution {
+    Ok(Solution {
         schedule,
         center: (55.7494539, 37.62160470000001),
         final_route,

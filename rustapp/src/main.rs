@@ -55,13 +55,7 @@ fn do_predict_raw(problem_raw: PublicProblem, state: State<LocalState>) -> error
     let normalized_problem = normalize_problem(problem,
                                                &state.places)?;
     let solution = solve(normalized_problem);
-    match solution {
-        Some(x) => Ok(x),
-        None => Err(Error {
-            error_name: "Solver",
-            error_message: None,
-        })
-    }
+    solution
 }
 
 
