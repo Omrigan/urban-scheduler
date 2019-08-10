@@ -12,7 +12,7 @@ export class Result extends Component {
 
     render() {
         return (<div>
-            {this.props.result.report && <Report report={this.props.result.report}/>}
+            {this.props.result.report && <Report report={this.props.result.report} config={this.props.result.config}/>}
 
             <ResultItemsList schedule={this.props.result.schedule}/>
 

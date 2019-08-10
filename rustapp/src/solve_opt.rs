@@ -8,6 +8,7 @@ use rand::distributions::Alphanumeric;
 use std::string::ToString;
 use itertools::Itertools;
 use std::process::Command;
+use crate::report::Report;
 
 fn prepare_distances_file(id: &str, p: &Problem, zpoint: usize) -> Result<()> {
     let mut file = File::create(format!("/tmp/{}/dists.dat", id))?;
@@ -67,12 +68,12 @@ fn prepare_main_file(id: &str, p: &Problem) -> Result<(usize, usize)> {
     Ok((zevent, zpoint))
 }
 
-fn run_solution(id: &str) -> Result<String> {
+fn run_solution(id: &str, report: &mut Report) -> Result<String> {
     let output = Command::new("zimpl")
         .arg(format!("/tmp/{}/main.zimpl", id))
         .current_dir(format!("/tmp/{}", id))
         .output()?;
-
+    report.checkpoint("zimpl_preprocessed");
     dbg!(&output);
 
     let output = Command::new("scip")
@@ -137,7 +138,7 @@ fn recover_answer(text_solution: String, p: &Problem, zevent: usize, zpoint: usi
     Ok(result)
 }
 
-pub fn solve_opt(problem: &Problem) -> Result<Vec<ScheduleItem>> {
+pub fn solve_opt(problem: &Problem, report: &mut Report) -> Result<Vec<ScheduleItem>> {
     let id: String = thread_rng()
         .sample_iter(&Alphanumeric)
         .take(64)
@@ -150,10 +151,11 @@ pub fn solve_opt(problem: &Problem) -> Result<Vec<ScheduleItem>> {
     let (zevent, zpoint) = prepare_main_file(&id, problem)?;
 
     prepare_distances_file(&id, problem, zpoint)?;
-
+    report.checkpoint("files_prepared");
     dbg!("Files prepared");
 
-    let text_solution = run_solution(&id)?;
+    let text_solution = run_solution(&id, report)?;
+    report.checkpoint("scip_solved");
 
     println!("{}", &text_solution);
 

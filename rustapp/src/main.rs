@@ -28,6 +28,7 @@ mod problem;
 mod error;
 mod solve_opt;
 mod test_helpers;
+mod report;
 //mod test_performance;
 
 
@@ -65,9 +66,13 @@ fn predict_raw(problem_raw: Json<PublicProblem>, state: State<LocalState>) -> Js
 
 fn do_predict_raw(problem_raw: PublicProblem, state: State<LocalState>) -> error::Result<Solution> {
     let problem = problem_raw;
+    let mut report = report::Report::new();
     let normalized_problem = normalize_problem(problem,
                                                &state.places)?;
-    let solution = solve(normalized_problem);
+    report.checkpoint("preprocessed");
+
+    let solution = solve(normalized_problem, report);
+
     solution
 }
 

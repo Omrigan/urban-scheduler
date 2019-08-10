@@ -26,23 +26,23 @@ export default class ListOfMarkers extends Component<> {
                 <hr/>
                 {report.stages.map((x, i) =>
                     <React.Fragment key={i}>
-                        Stage {x[0]} completed in {x[1]} milliseconds <br />
+                        Stage {x.name} completed in {x.timestamp} milliseconds <br />
                     </React.Fragment>)}
 
                 <hr/>
 
                 <h5>Config</h5>
-                {Object.entries(report.config).map( (x, i) =>
+                {Object.entries(this.props.config).map( (x, i) =>
                     <React.Fragment key={i}>
                         {x[0]}={x[1]} <br/>
                     </React.Fragment>)}
                 <hr/>
 
-                <h5>Number of candidates per stage</h5>
-                {Object.entries(report.numbers_of_candidates).map((x, i) =>
-                      <React.Fragment key={i}>
-                          {i}: {x[1]} <br/>
-                    </React.Fragment>)}
+                {/*<h5>Number of candidates per stage</h5>*/}
+                {/*{Object.entries(report.numbers_of_candidates).map((x, i) =>*/}
+                {/*      <React.Fragment key={i}>*/}
+                {/*          {i}: {x[1]} <br/>*/}
+                {/*    </React.Fragment>)}*/}
             </Message>)
     }
 }

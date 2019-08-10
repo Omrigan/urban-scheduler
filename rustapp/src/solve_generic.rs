@@ -7,6 +7,7 @@ use ndarray_stats::QuantileExt;
 use std::collections::BinaryHeap;
 use std::cmp::Ordering;
 use std::cmp::Ordering::Equal;
+use crate::report::Report;
 
 
 #[derive(Debug)]
@@ -177,7 +178,7 @@ impl PartialEq for Node<'_> {
 
 impl Eq for Node<'_> {}
 
-pub fn solve_generic(problem: &Problem) -> Result<Vec<ScheduleItem>> {
+pub fn solve_generic(problem: &Problem, report: &mut Report) -> Result<Vec<ScheduleItem>> {
     let mut st = SearchTree {
         problem,
         heap: BinaryHeap::new(),
@@ -215,6 +216,7 @@ pub fn solve_generic(problem: &Problem) -> Result<Vec<ScheduleItem>> {
     while let Some(head) = st.heap.pop() {
         st.expand_node(head);
     }
+    report.checkpoint("tree_built");
     dbg!(&st);
     st.recover_answer()
 }

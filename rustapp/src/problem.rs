@@ -15,6 +15,7 @@ use std::str;
 use bson::Bson;
 use std::collections::HashSet;
 use crate::solve_opt::solve_opt;
+use crate::report::{Report, PublicReport};
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -247,12 +248,13 @@ impl ScheduleItem {
 }
 
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize)]
 pub struct Solution {
     schedule: Vec<ScheduleItem>,
     pub final_route: Option<Vec<(f64, f64)>>,
     center: (f64, f64),
     config: Config,
+    report: PublicReport
 }
 
 
@@ -348,7 +350,7 @@ fn sample_any(event: &Event) -> &MyPoint {
 
 pub type Schedule = Vec<MyPoint>;
 
-pub fn solve(problem: Problem) -> Result<Solution> {
+pub fn solve(problem: Problem, mut report: Report) -> Result<Solution> {
     let schedule = if problem.events.len() == 0 {
         Vec::new()
     } else if problem.events.len() == 1 {
@@ -358,10 +360,12 @@ pub fn solve(problem: Problem) -> Result<Solution> {
         match problem.config.solve_algorithm {
             SolveAlgorithm::Stupid => solve_stupid(&problem),
             SolveAlgorithm::Ordered => solve_ordered(&problem),
-            SolveAlgorithm::Generic => solve_generic(&problem)?,
-            SolveAlgorithm::Opt => solve_opt(&problem)?
+            SolveAlgorithm::Generic => solve_generic( &problem, &mut report)?,
+            SolveAlgorithm::Opt => solve_opt(&problem, &mut report)?
         }
     };
+    report.checkpoint("solved");
+
 
     let points_vec: Vec<MyPoint> =
         schedule.iter().map(|item| item.point).collect(); // TODO: rewrite
@@ -378,6 +382,7 @@ pub fn solve(problem: Problem) -> Result<Solution> {
         center: (55.7494539, 37.62160470000001),
         final_route,
         config: problem.config,
+        report: report.finish()
     })
 }
 
