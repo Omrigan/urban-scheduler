@@ -16,7 +16,7 @@ fn prepare_distances_file(id: &str, p: &Problem, zpoint: usize) -> Result<()> {
             let last_dists = calculate_distance(p.config.dists_method, &x.points, &y.points);
             for ((p1, p2), dist) in last_dists.indexed_iter() {
                 file.write_fmt(format_args!("{} {} {}\n",
-                                            x.points[p1].idx, x.points[p2].idx, dist))?;
+                                            x.points[p1].idx, y.points[p2].idx, dist))?;
             }
         }
     }

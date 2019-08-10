@@ -31,6 +31,7 @@ class App extends Component {
     }
 
     updateResult = (result) => {
+        console.log("Result", result);
         this.setState({inprogress: false, result: result})
     };
 

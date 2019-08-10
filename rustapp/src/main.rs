@@ -18,6 +18,7 @@ use rocket_contrib::json::Json;
 use rocket::{Rocket, Request};
 use rocket::config::{Config, Environment};
 use rocket::State;
+use serde::{Serialize, Deserialize};
 
 mod solve_ordered;
 mod solve_generic;
@@ -45,9 +46,21 @@ fn not_found(req: &Request) -> Json<Error> {
 }
 
 
+#[derive(Debug, Serialize)]
+#[serde(untagged)]
+enum RequestResult {
+    Ok(Solution),
+    Err(error::Error)
+}
+
 #[post("/predict_raw", format = "json", data = "<problem_raw>")]
-fn predict_raw(problem_raw: Json<PublicProblem>, state: State<LocalState>) -> Json<error::Result<Solution>> {
-    Json(do_predict_raw(problem_raw.into_inner(), state))
+fn predict_raw(problem_raw: Json<PublicProblem>, state: State<LocalState>) -> Json<RequestResult> {
+    let result = do_predict_raw(problem_raw.into_inner(), state);
+    let request_result = match result {
+        Ok(s) => RequestResult::Ok(s),
+        Err(s) => RequestResult::Err(s)
+    };
+    Json(request_result)
 }
 
 fn do_predict_raw(problem_raw: PublicProblem, state: State<LocalState>) -> error::Result<Solution> {

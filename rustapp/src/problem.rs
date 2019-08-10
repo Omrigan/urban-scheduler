@@ -14,6 +14,7 @@ use bson;
 use std::str;
 use bson::Bson;
 use std::collections::HashSet;
+use crate::solve_opt::solve_opt;
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -158,7 +159,7 @@ impl PublicEvent {
             PublicEvent::FixedPlace(event) =>
                 wrap_points(event.into_points(), event.name),
             PublicEvent::Category(event) =>
-                resolve_category(event,  places_collection),
+                resolve_category(event, places_collection),
             PublicEvent::Sequential(event) =>
                 process_container(event.items, idx_offset, places_collection, true),
             PublicEvent::Parallel(event) =>
@@ -191,6 +192,7 @@ enum SolveAlgorithm {
     Stupid,
     Ordered,
     Generic,
+    Opt,
 }
 
 
@@ -271,8 +273,17 @@ fn normalize_legacy(public_events: Vec<PublicEvent>) -> Vec<Event> {
 }
 
 fn normalize_events(public_events: Vec<PublicEvent>, places_collection: &Collection) -> Vec<Event> {
-    let events = process_container(public_events, 0,
-                                       places_collection, true);
+    let mut events = process_container(public_events, 0,
+                                   places_collection, true);
+    let mut point_idx = 1usize;
+    for event in events.iter_mut() {
+        for pt in event.points.iter_mut() {
+            if pt.idx == 0 {
+                pt.idx = point_idx;
+                point_idx += 1;
+            }
+        }
+    }
     events
 }
 
@@ -328,6 +339,7 @@ pub fn solve(problem: Problem) -> Result<Solution> {
             SolveAlgorithm::Stupid => solve_stupid(&problem),
             SolveAlgorithm::Ordered => solve_ordered(&problem),
             SolveAlgorithm::Generic => solve_generic(&problem)?,
+            SolveAlgorithm::Opt => solve_opt(&problem)?
         }
     };
 

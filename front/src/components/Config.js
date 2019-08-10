@@ -57,6 +57,11 @@ const algorithms = [
         text: "Generic",
         key: 3,
         value: "generic"
+    },
+    {
+        text: "Opt",
+        key: 4,
+        value: "opt"
     }
 ];
 
