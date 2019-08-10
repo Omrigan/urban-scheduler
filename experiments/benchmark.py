@@ -13,7 +13,7 @@ def request(endpoint, data):
 
 
 def get_ordered_problem():
-    f = open('helpers/sample_requests/ordered_benchmark.yaml')
+    f = open('problems/ordered_benchmark.yaml')
     content = load(f)
     return content
 
