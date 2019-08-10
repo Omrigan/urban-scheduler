@@ -71,6 +71,13 @@ impl std::convert::From<std::num::ParseIntError> for Error {
 }
 
 
+impl std::convert::From<std::num::ParseFloatError> for Error {
+    fn from(err: std::num::ParseFloatError) -> Self {
+        Error::fmt("ParseFloat", err)
+    }
+}
+
+
 //impl std::convert::From<url::parser::ParseError> for Error {
 //    fn from(_: url::parser::ParseError) -> Self {
 //        Error {

@@ -75,17 +75,25 @@ class CategoryEvent extends Component {
         const value = data.value;
         this.props.onChange({
             category: value,
-            brand: null,
             name: value
         });
+
     };
 
     onChangeBrand = (e, data) => {
         const value = data.value;
-        this.props.onChange({
-            brand: value,
-            name: value
-        });
+        if (value == "") {
+            const cat = this.props.event.category;
+            this.props.onChange({
+                category: cat,
+                name: cat
+            })
+        } else {
+            this.props.onChange({
+                brand: value,
+                name: value
+            });
+        }
     };
 
 

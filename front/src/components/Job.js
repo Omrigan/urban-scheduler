@@ -51,11 +51,11 @@ export class Job extends Component {
                 options: options,
             });
         }).then(() => {
-             const problem = loadProblem();
-             if(problem) {
-	    	this.setProblem(problem);
-	    }
-	});
+            const problem = loadProblem();
+            if (problem) {
+                this.setProblem(problem);
+            }
+        });
 
 
         getCities(this.setState.bind(this));
@@ -82,6 +82,7 @@ export class Job extends Component {
             config: this.state.config,
             version: version
         };
+        problem.config.clipping = parseInt(problem.config.clipping, 10);
 
         if (version === 1) {
             problem.ordered_events = this.state.eventContainer.items;
@@ -100,11 +101,10 @@ export class Job extends Component {
     };
 
 
-
     send = () => {
         this.props.startPredict();
         let version = defaultProblemVersion;
-        if(this.state.config.solver !== "rust"){
+        if (this.state.config.solver !== "rust") {
             version = 1
         }
         const problem = this.getProblem(version);

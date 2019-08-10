@@ -77,7 +77,7 @@ fn run_solution(id: &str) -> Result<String> {
 
     let output = Command::new("scip")
         .arg("-c")
-        .arg("read main.lp set limits time 1 optimize write solution main.sol quit")
+        .arg("read main.lp set limits time 10 optimize write solution main.sol quit")
         .current_dir(format!("/tmp/{}", id))
         .output()?;
 
@@ -91,7 +91,7 @@ fn run_solution(id: &str) -> Result<String> {
 
 fn recover_answer(text_solution: String, p: &Problem, zevent: usize, zpoint: usize) -> Result<Vec<ScheduleItem>> {
     let mut next = vec![0usize; zevent + 1];
-    let mut selected = vec![false; zevent + 1];
+    let mut selected = vec![false; zpoint + 1];
 
     let mut solution_status = true;
     for line in text_solution.split('\n') {
@@ -151,6 +151,8 @@ pub fn solve_opt(problem: &Problem) -> Result<Vec<ScheduleItem>> {
 
     prepare_distances_file(&id, problem, zpoint)?;
 
+    dbg!("Files prepared");
+
     let text_solution = run_solution(&id)?;
 
     println!("{}", &text_solution);
@@ -158,6 +160,7 @@ pub fn solve_opt(problem: &Problem) -> Result<Vec<ScheduleItem>> {
     let solution = recover_answer(text_solution, problem, zevent, zpoint);
 
     solution
+//    Err(UNKNOWN_ERROR)
 }
 
 #[cfg(test)]

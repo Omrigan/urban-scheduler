@@ -82,13 +82,14 @@ fn wrap_points(points: Vec<MyPoint>, name: Option<String>) -> Vec<Event> {
 }
 
 fn process_container(public_events: Vec<PublicEvent>, idx_offset: usize,
-                     places_collection: &Collection, is_sequential: bool) -> Vec<Event> {
+                     places_collection: &Collection, clipping: Option<usize>,
+                     is_sequential: bool) -> Vec<Event> {
     let mut bs = BitSet::new();
     let mut events = Vec::new();
 
     let mut global_idx = idx_offset;
     for event in public_events.into_iter() {
-        let mut sub_events = event.into_events(global_idx, places_collection);
+        let mut sub_events = event.into_events(global_idx, places_collection, clipping);
 
         if is_sequential {
             for event in sub_events.iter_mut() {
@@ -106,21 +107,23 @@ fn process_container(public_events: Vec<PublicEvent>, idx_offset: usize,
     return events;
 }
 
-fn parse_mongo_coord(coord: Option<&Bson>) -> Result<f64> {
-    coord.and_then(|bson| match bson {
-        Bson::FloatingPoint(value) => Some(value.clone()),
-        Bson::String(str) => str.parse().ok(),
-        _ => None
+fn parse_mongo_coord(doc: &OrderedDocument, key: &str) -> Result<f64> {
+    let value = doc.get(key).ok_or(Error::fmt("NoCoordComponent",
+                                              format!("{} in {}", key, doc)))?;
+
+    match value {
+        Bson::FloatingPoint(value) => Ok(value.clone()),
+        Bson::String(str) => str.parse().map_err(Error::from),
+        _ => Err(Error::fmt("UnkCoordType", format!("{} in {}", key, doc)))
     }
-    ).ok_or(Error::fmt("PointParse", coord))
 }
 
 fn parse_schedule_item(doc: OrderedDocument) -> Result<MyPoint> {
     let location_doc = doc.get_document("location").unwrap();
     dbg!(&location_doc);
     let location = Location {
-        lat: parse_mongo_coord(location_doc.get("lat"))?,
-        lng: parse_mongo_coord(location_doc.get("lng"))?,
+        lat: parse_mongo_coord(location_doc, "lat")?,
+        lng: parse_mongo_coord(location_doc, "lng")?,
     };
     //let location: Location = bson::from_bson(bson::Bson::from(location_doc.to_owned())).unwrap();
     Ok(MyPoint {
@@ -130,7 +133,8 @@ fn parse_schedule_item(doc: OrderedDocument) -> Result<MyPoint> {
 }
 
 fn resolve_category(event: CategoryEvent,
-                    places_collection: &Collection) -> Vec<Event> {
+                    places_collection: &Collection,
+                    clipping: Option<usize>) -> Vec<Event> {
     let mut filter = doc! {
     "categories": &event.category
     };
@@ -141,10 +145,17 @@ fn resolve_category(event: CategoryEvent,
     dbg!(&filter);
 
 
-    let points: Vec<MyPoint> = places_collection.find(Some(filter), None).unwrap()
+    let mut points: Vec<MyPoint> = places_collection.find(Some(filter), None).unwrap()
         .filter_map(std::result::Result::ok)
         .map(parse_schedule_item).filter_map(Result::ok)
         .collect();
+
+    match clipping {
+        Some(x) => if points.len() > x {
+            points.resize_with(x, || panic!("Impossible"));
+        },
+        None => ()
+    };
 
     let name = event.name.or(event.brand).unwrap_or(event.category);
 
@@ -152,18 +163,22 @@ fn resolve_category(event: CategoryEvent,
 }
 
 impl PublicEvent {
-    fn into_events(self, idx_offset: usize, places_collection: &Collection) -> Vec<Event> {
+    fn into_events(self, idx_offset: usize,
+                   places_collection: &Collection,
+                   clipping: Option<usize>) -> Vec<Event> {
         let events = match self {
             PublicEvent::Points(event) =>
                 wrap_points(event.points, None),
             PublicEvent::FixedPlace(event) =>
                 wrap_points(event.into_points(), event.name),
             PublicEvent::Category(event) =>
-                resolve_category(event, places_collection),
+                resolve_category(event, places_collection, clipping),
             PublicEvent::Sequential(event) =>
-                process_container(event.items, idx_offset, places_collection, true),
+                process_container(event.items, idx_offset,
+                                  places_collection, clipping, true),
             PublicEvent::Parallel(event) =>
-                process_container(event.items, idx_offset, places_collection, false),
+                process_container(event.items, idx_offset,
+                                  places_collection, clipping, false),
         };
         return events;
     }
@@ -210,6 +225,7 @@ pub struct Config {
     solve_algorithm: SolveAlgorithm,
     #[serde(default)]
     final_route: bool,
+    clipping: Option<usize>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -272,9 +288,11 @@ fn normalize_legacy(public_events: Vec<PublicEvent>) -> Vec<Event> {
     events
 }
 
-fn normalize_events(public_events: Vec<PublicEvent>, places_collection: &Collection) -> Vec<Event> {
+fn normalize_events(public_events: Vec<PublicEvent>,
+                    places_collection: &Collection,
+                    clipping: Option<usize>) -> Vec<Event> {
     let mut events = process_container(public_events, 0,
-                                   places_collection, true);
+                                       places_collection, clipping, true);
     let mut point_idx = 1usize;
     for event in events.iter_mut() {
         for pt in event.points.iter_mut() {
@@ -307,7 +325,9 @@ pub fn normalize_problem(problem: PublicProblem, places_collection: &Collection)
     let events = if problem.version == 1 {
         normalize_legacy(problem.events)
     } else {
-        normalize_events(problem.events, places_collection)
+        normalize_events(problem.events,
+                         places_collection,
+                         problem.config.clipping)
     };
 
 
