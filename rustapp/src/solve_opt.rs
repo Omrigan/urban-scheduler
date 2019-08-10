@@ -77,7 +77,7 @@ fn run_solution(id: &str) -> Result<String> {
 
     let output = Command::new("scip")
         .arg("-c")
-        .arg("read main.lp set limits time 10 optimize write solution main.sol quit")
+        .arg("read main.lp set limits time 100 optimize write solution main.sol quit")
         .current_dir(format!("/tmp/{}", id))
         .output()?;
 
