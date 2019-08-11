@@ -43,21 +43,18 @@ RUN add-apt-repository ppa:jonathonf/gcc-7.3 # Thanks ubuntu 16.04
 RUN apt-get update && apt-get install -y libgfortran4
 
 
-COPY src/opt/SCIPOptSuite-6.0.2-Linux/bin/scip /usr/local/bin/scip
+COPY src/opt/scip /usr/local/bin/scip
 
-COPY src/opt/SCIPOptSuite-6.0.2-Linux/bin/zimpl /usr/local/bin/zimpl
+COPY src/opt/zimpl /usr/local/bin/zimpl
 
+RUN cp /usr/src/usrust/target/x86_64-unknown-linux-musl/release/usrust /usr/local/bin/usrust
 
 FROM debian:latest
 
-COPY --from=build /usr/src/usrust/target/x86_64-unknown-linux-musl/release/usrust /usr/local/bin/usrust
+COPY --from=build /usr/local/bin /usr/local/bin
 
 RUN apt-get update  && \
     apt-get install -y liblapack-dev gcc libgfortran4
-
-COPY src/opt/SCIPOptSuite-6.0.2-Linux/bin/scip /usr/local/bin/scip
-
-COPY src/opt/SCIPOptSuite-6.0.2-Linux/bin/zimpl /usr/local/bin/zimpl
 
 
 CMD ["usrust"]
