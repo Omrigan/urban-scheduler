@@ -55,7 +55,7 @@ impl<'s> SearchTree<'s> {
             };
 
 
-            let best_path: f64 = *last_distances_some.min().unwrap();
+            let best_path: f64 = node.meta.best_path + *last_distances_some.min().unwrap();
             let heuristic = best_path / depth as f64;
 
             let mut visited = meta.visited.clone();

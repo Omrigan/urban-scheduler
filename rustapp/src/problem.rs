@@ -109,7 +109,7 @@ fn process_container(public_events: Vec<PublicEvent>, idx_offset: usize,
 }
 
 fn parse_mongo_coord(doc: &OrderedDocument, key: &str) -> Result<f64> {
-    let value = doc.get(key).ok_or(Error::fmt("NoCoordComponent",
+    let value = doc.get(key).ok_or(Error::fmt_silent("NoCoordComponent",
                                               format!("{} in {}", key, doc)))?;
 
     match value {
@@ -121,7 +121,7 @@ fn parse_mongo_coord(doc: &OrderedDocument, key: &str) -> Result<f64> {
 
 fn parse_schedule_item(doc: OrderedDocument) -> Result<MyPoint> {
     let location_doc = doc.get_document("location").unwrap();
-    dbg!(&location_doc);
+//    dbg!(&location_doc);
     let location = Location {
         lat: parse_mongo_coord(location_doc, "lat")?,
         lng: parse_mongo_coord(location_doc, "lng")?,

@@ -12,8 +12,8 @@ use crate::report::Report;
 
 fn prepare_distances_file(id: &str, p: &Problem, zpoint: usize) -> Result<()> {
     let mut file = File::create(format!("/tmp/{}/dists.dat", id))?;
-    for pairs in p.events.windows(2) {
-        if let [x, y] = pairs {
+    for x in p.events.iter() {
+        for y in p.events.iter() {
             let last_dists = calculate_distance(p.config.dists_method, &x.points, &y.points);
             for ((p1, p2), dist) in last_dists.indexed_iter() {
                 file.write_fmt(format_args!("{} {} {}\n",

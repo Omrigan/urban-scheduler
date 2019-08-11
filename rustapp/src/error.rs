@@ -36,6 +36,13 @@ impl Error {
         println!("{:#?}", err);
         err
     }
+    pub fn fmt_silent<T: Debug>(name: &'static str, info: T) -> Self {
+        let err = Error {
+            error_name: name,
+            error_message: Some(format!("{:#?}", info)),
+        };
+        err
+    }
 }
 
 pub const UNKNOWN_ERROR: Error = Error {

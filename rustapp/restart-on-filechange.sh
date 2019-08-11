@@ -14,7 +14,7 @@ sigint_handler()
 trap sigint_handler SIGINT
 
 while true; do
-  cargo build  --target=x86_64-unknown-linux-musl
+  cargo build --target=x86_64-unknown-linux-musl
   cargo run --target=x86_64-unknown-linux-musl &
   PID=$!
   sleep 3

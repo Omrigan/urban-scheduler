@@ -1,9 +1,9 @@
 config:
   routingBackend: dummy
-  clipping: 100
+  clipping: 10
   solver: rust
   city: moscow
-  final_route: true
+  final_route: false
   solve_algorithm: generic
 version: 2
 events:
