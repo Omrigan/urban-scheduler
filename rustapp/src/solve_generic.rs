@@ -28,7 +28,11 @@ impl<'s> SearchTree<'s> {
         if meta.depth == total_events {
             self.best = Some(match self.best {
                 None => node,
-                Some(prev) => (&*node).min(prev)
+                Some(prev) => {
+                    let value = (&*node).min(prev);
+
+                    value
+                }
             });
             return;
         }
@@ -55,7 +59,7 @@ impl<'s> SearchTree<'s> {
             };
 
 
-            let best_path: f64 = node.meta.best_path + *last_distances_some.min().unwrap();
+            let best_path: f64 = *last_distances_some.min().unwrap();
             let heuristic = best_path / depth as f64;
 
             let mut visited = meta.visited.clone();
@@ -123,10 +127,6 @@ impl<'s> SearchTree<'s> {
         current_meta = current_meta.parent.unwrap();
 
         reverted_schedule_events.push(current_meta.event_idx);
-
-        dbg!(&reverted_schedule_points);
-
-        dbg!(&reverted_schedule_events);
 
         for (event_idx, point_idx) in reverted_schedule_events.iter().zip(
             reverted_schedule_points.iter()).rev() {
@@ -242,7 +242,6 @@ mod tests {
 
     #[test]
     fn test_incorrect() {
-
         let mut report = Report::new();
         let p = incorrect_generic();
         let result = solve_generic(&p, &mut report);

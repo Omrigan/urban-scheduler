@@ -26,6 +26,9 @@ fn prepare_distances_file(id: &str, p: &Problem, zpoint: usize) -> Result<()> {
         for point in event.points.iter() {
             file.write_fmt(format_args!("{} {} {}\n",
                                         point.idx, zpoint, 0))?;
+
+            file.write_fmt(format_args!("{} {} {}\n",
+                                        zpoint, point.idx, 0))?;
         }
     }
 
@@ -97,7 +100,6 @@ fn recover_answer(text_solution: String, p: &Problem, zevent: usize, zpoint: usi
     let mut solution_status = true;
     for line in text_solution.split('\n') {
         let terms: Vec<&str> = line.split_whitespace().collect();
-        dbg!(&terms);
         if terms.len() > 0 {
             if terms[0] == "solution" {
                 solution_status = terms[2] == "optimal";

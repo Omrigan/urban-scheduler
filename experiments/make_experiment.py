@@ -51,6 +51,7 @@ def compare(problem, alg1, alg2, normalize_order=False):
         del p1['color']
         del p2['color']
         print(p1, p2)
+    print()
     for p1, p2 in zip(*schedules):
         assert p1 == p2
 
@@ -144,7 +145,7 @@ def gtsp_generator(base_problem):
     return gen
 
 
-def gtsp_generator2(base_problem):
+def gtsp_pts_per_event_generator(base_problem):
     def gen(x):
         return generate_gtsp(base_problem, 5, x)
 
@@ -171,26 +172,32 @@ def ensure_correct():
     compare(tsp1, "generic", "opt", normalize_order=True)
     tsp2 = generate_tsp(tsp1, 7)
     compare(tsp2, "generic", "opt", normalize_order=True)
+    gtsp2 = generate_gtsp(gtsp1, 5, 3)
+    compare(gtsp2, "generic", "opt", normalize_order=True)
 
 
-def plot_gtsp():
+def plot_gtsp_pts_per_event():
     print("Generic")
-    make_plot('gtsp_generic.dat', range(1, 20, 2), gtsp_generator2(tsp1))
+    make_plot('gtsp_pts_per_event_generic.dat', range(1, 20, 2), gtsp_pts_per_event_generator(tsp1))
     tsp1_opt = deepcopy(tsp1)
     tsp1_opt["config"]["solve_algorithm"] = 'opt'
     print("Opt")
-    make_plot('gtsp_opt.dat', range(1, 20, 2), gtsp_generator2(tsp1_opt))
+    make_plot('gtsp_pts_per_event_opt.dat', range(1, 20, 2), gtsp_pts_per_event_generator(tsp1_opt))
 
 
 def plot_tsp():
     print("Generic")
-    make_plot(range(3, 9), tsp_generator(tsp1))
+    make_plot('tsp_generic.dat', range(3, 9), tsp_generator(tsp1))
     tsp1_opt = deepcopy(tsp1)
     tsp1_opt["config"]["solve_algorithm"] = 'opt'
     print("Opt")
-    make_plot(range(3, 20), tsp_generator(tsp1_opt))
+    make_plot('tsp_opt.dat', range(3, 20), tsp_generator(tsp1_opt))
 
 
 if __name__ == "__main__":
-    pretty_print(generate_gtsp(tsp1, 6, 2))
+    # pretty_print(generate_gtsp(tsp1, 6, 2))
     ensure_correct()
+    # tsp2 = generate_tsp(tsp1, 8)
+    # compare(tsp2, "generic", "opt", normalize_order=True)
+    # plot_gtsp_pts_per_event()
+    plot_tsp()
