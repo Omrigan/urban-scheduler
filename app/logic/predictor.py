@@ -148,18 +148,20 @@ class Predictor:
     def _solve_ordered_rust(self, all_candidates):
         events_int_to_mongo = []
         rust_events = []
+        point_idx = 1
         for event in all_candidates:
             this_dct = {}
             this_event = {
                 "type": "points",
                 "points": []
             }
-            for i, point in enumerate(event):
-                this_dct[i] = point["_id"]
+            for point in event:
+                this_dct[point_idx] = point["_id"]
                 this_event["points"].append({
                     "coords": to_rust_coords(point['location']),
-                    "idx": i
+                    "idx": point_idx
                 })
+                point_idx += 1
             events_int_to_mongo.append(this_dct)
             rust_events.append(this_event)
 
@@ -169,7 +171,7 @@ class Predictor:
             "events": rust_events,
             "config": self.config
         }).json()
-        if 'error_code' in result:
+        if 'error_name' in result:
             raise ExternalError(result)
         self.final_route = result.get('full_route')
         self.checkpoint("rust_completed")

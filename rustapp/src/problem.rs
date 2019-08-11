@@ -110,7 +110,7 @@ fn process_container(public_events: Vec<PublicEvent>, idx_offset: usize,
 
 fn parse_mongo_coord(doc: &OrderedDocument, key: &str) -> Result<f64> {
     let value = doc.get(key).ok_or(Error::fmt_silent("NoCoordComponent",
-                                              format!("{} in {}", key, doc)))?;
+                                                     format!("{} in {}", key, doc)))?;
 
     match value {
         Bson::FloatingPoint(value) => Ok(value.clone()),
@@ -254,7 +254,7 @@ pub struct Solution {
     pub final_route: Option<Vec<(f64, f64)>>,
     center: (f64, f64),
     config: Config,
-    report: PublicReport
+    report: PublicReport,
 }
 
 
@@ -312,7 +312,7 @@ fn validate_problem(problem: &Problem) -> Result<()> {
     for event in &problem.events {
         for point in &event.points {
             let idx = point.idx;
-            if problem_idxes.contains(&idx) {
+            if idx != 0 && problem_idxes.contains(&idx) {
                 return Err(Error::fmt("Validation",
                                       format!("Point {} is present twice", idx)));
             } else {
@@ -360,7 +360,7 @@ pub fn solve(problem: Problem, mut report: Report) -> Result<Solution> {
         match problem.config.solve_algorithm {
             SolveAlgorithm::Stupid => solve_stupid(&problem),
             SolveAlgorithm::Ordered => solve_ordered(&problem),
-            SolveAlgorithm::Generic => solve_generic( &problem, &mut report)?,
+            SolveAlgorithm::Generic => solve_generic(&problem, &mut report)?,
             SolveAlgorithm::Opt => solve_opt(&problem, &mut report)?
         }
     };
@@ -382,7 +382,7 @@ pub fn solve(problem: Problem, mut report: Report) -> Result<Solution> {
         center: (55.7494539, 37.62160470000001),
         final_route,
         config: problem.config,
-        report: report.finish()
+        report: report.finish(),
     })
 }
 
