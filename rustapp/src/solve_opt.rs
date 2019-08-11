@@ -173,9 +173,10 @@ mod tests {
 
     #[test]
     fn test_search() {
+        let mut report = Report::new();
         let p = sample_generic();
 
-        let result = solve_opt(&p).unwrap();
+        let result = solve_opt(&p, &mut report).unwrap();
         dbg!(&result);
         assert_eq!(result.len(), 2);
         assert_eq!(result[0].point.idx, 1);
@@ -184,9 +185,10 @@ mod tests {
 
     #[test]
     fn test_incorrect() {
+        let mut report = Report::new();
         let p = incorrect_generic();
 
-        let result = solve_opt(&p);
+        let result = solve_opt(&p, &mut report);
         assert!(result.is_err());
     }
 }
