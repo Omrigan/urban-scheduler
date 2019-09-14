@@ -1,29 +1,13 @@
-use rand::{thread_rng, seq::SliceRandom};
 use ndarray_stats::QuantileExt;
 
-use crate::distances::{MyPoint, DistanceMatrix, AnswersMatrix,
+use crate::distances::{DistanceMatrix, AnswersMatrix,
                        calculate_distance, squash_distances};
-use crate::problem::{Event, Problem, Solution};
+use crate::problem::{Problem, ScheduleItem};
 
 
-fn sample_any(event: &Event) -> &MyPoint {
-    let mut rng = thread_rng();
-    event.points.choose(&mut rng).unwrap()
-}
 
-pub fn solve_ordered(p: &Problem) -> Solution {
-    let mut result = Solution {
-        schedule: Vec::with_capacity(p.events.len()),
-        full_route: None,
-    };
-    if p.events.len() == 0 {
-        return result;
-    }
-    if p.events.len() == 1 {
-        result.schedule.push(sample_any(&p.events[0]).clone());
-        return result;
-    }
-
+pub fn solve_ordered(p: &Problem) -> Vec<ScheduleItem> {
+    let mut result = Vec::with_capacity(p.events.len());
 
     let mut answers = Vec::<AnswersMatrix>::new();
     let mut current_dists: Option<DistanceMatrix> = None;
@@ -63,69 +47,56 @@ pub fn solve_ordered(p: &Problem) -> Solution {
     reverted_schedule_idxs.push(start);
 
     for (idx, schedule_item) in reverted_schedule_idxs.iter().rev().enumerate() {
-        result.schedule.push(p.events[idx].points[*schedule_item].clone());
+        let event = &p.events[idx];
+        result.push(ScheduleItem::construct(event,
+                                            event.points[*schedule_item].clone()));
     }
 
     result
 }
 
 
-pub fn solve_stupid(p: &Problem) -> Solution {
+pub fn solve_stupid(p: &Problem) -> Vec<ScheduleItem> {
     let mut schedule = Vec::with_capacity(p.events.len());
 
     for event in p.events.iter() {
-        schedule.push(event.points[0].clone());
+        schedule.push(ScheduleItem::construct(event, event.points[0].clone()));
     }
-    Solution {
-        schedule,
-        full_route: None
-    }
+
+    schedule
 }
 
 
 #[cfg(test)]
 mod tests {
-    // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
-    use crate::problem::Config;
-    use bit_set::BitSet;
+    use crate::test_helpers::*;
 
-    fn get_sample_problem() -> Problem {
-        let sample_point = MyPoint {
-            idx: 0,
-            coords: (1f64, 2f64),
-        };
-        let sample_event = Event {
-            idx: 0,
-            points: vec![sample_point],
-            before: BitSet::new(),
-        };
-        Problem {
-            events: vec![sample_event],
-            config: Config::default(),
-        }
-    }
+    use crate::problem::{Config, Event};
+    use crate::distances::MyPoint;
+
+    use bit_set::BitSet;
 
 
     #[test]
     fn test_sample_problem() {
-        let p = get_sample_problem();
-        assert_eq!(p.events.len(), 1);
+        let p = sample_ordered();
+        assert_eq!(p.events.len(), 2);
     }
 
     #[test]
     fn test_stupid_solution() {
-        let p = get_sample_problem();
+        let p = sample_ordered();
         let s = solve_stupid(&p);
-        assert_eq!(s.schedule.len(), p.events.len());
+        assert_eq!(s.len(), p.events.len());
     }
 
 
     #[test]
     fn test_ordered_solution() {
-        let p = get_sample_problem();
+        let p = sample_ordered();
         let s = solve_ordered(&p);
-        assert_eq!(s.schedule.len(), p.events.len());
+        assert_eq!(s.len(), p.events.len());
     }
 
     #[test]

@@ -1,0 +1,11 @@
+ordered_events:
+  - type: category
+    category: park
+  - type: category
+    category: cafe
+  - type: category
+    category: restaurant
+config:
+  clipping: 100
+  city: 'moscow'
+  solver: 'rust'

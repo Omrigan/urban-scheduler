@@ -1,12 +1,5 @@
 import React, {Component} from 'react';
 import '../App.css';
-import ListOfMarkers from './ListOfMarkers';
-import ResultItemsList from './ResultItem';
-
-// import HEREMap from 'react-here-maps'
-import {Helmet} from "react-helmet";
-// import '../vendor/mapsjs-core'
-// import './vendor/mapsjs-service.js'
 
 
 export default class ResultMap extends Component {
@@ -18,7 +11,6 @@ export default class ResultMap extends Component {
     render() {
         return (<React.Fragment>
             <div id="here-map" style={{width: '100%', height: '400px', background: 'grey'}}/>
-
         </React.Fragment>)
     }
 
@@ -43,7 +35,10 @@ export default class ResultMap extends Component {
         const mapEvents = new H.mapevents.MapEvents(map);
         const behavior = new H.mapevents.Behavior(mapEvents);
 
-        const markers = this.props.schedule.map(item => new H.map.Marker(item.location));
+        const markers = this.props.schedule.map(item => new H.map.Marker({
+            lat: item.coords[0],
+            lng: item.coords[1],
+        }));
         this.state.map.addObjects(markers);
 
         const routeShape = this.props.final_route;

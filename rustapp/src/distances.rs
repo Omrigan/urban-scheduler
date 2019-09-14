@@ -1,21 +1,20 @@
-use serde::{Serialize, Deserialize};
-//use geo::prelude::*;
+use crate::error::{Result};
 
+use std::env;
+
+use serde_json;
+use serde::{Serialize, Deserialize};
 use ndarray::{Array1, Array2};
 use ndarray_stats::QuantileExt;
 use geo::Point;
 use geo::prelude::*;
-
-
 use reqwest;
-//use std::collections::HashMap;
 
-use serde_json;
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub struct MyPoint {
     pub coords: (f64, f64),
-    pub idx: u64,
+    pub idx: usize
 }
 
 impl MyPoint {
@@ -42,8 +41,6 @@ pub type DistanceMatrix = Array2<Distance>;
 pub type AnswersMatrix = Array2<usize>;
 
 
-use std::env;
-
 
 impl Default for DistsMethod {
     fn default() -> Self {
@@ -69,9 +66,9 @@ fn calculate_distance_euclid(p1: MyPoint, p2: MyPoint) -> Distance {
 
 const SUMMARY: &str = "summary";
 
-pub fn calculate_route_here(points: &[MyPoint], route_attributes: &str) -> serde_json::Value {
-    let here_app_id = env::var("HERE_APP_ID").unwrap();
-    let here_app_code = env::var("HERE_APP_CODE").unwrap();
+pub fn calculate_route_here(points: &[MyPoint], route_attributes: &str) -> Result<serde_json::Value> {
+    let here_app_id = env::var("HERE_APP_ID")?;
+    let here_app_code = env::var("HERE_APP_CODE")?;
 
     let waypoint_part: Vec<String> = points.iter().enumerate().map(
         |(i, p)| format!("waypoint{}=geo!{}", i, p.get_string_repr())).collect();
@@ -85,13 +82,13 @@ pub fn calculate_route_here(points: &[MyPoint], route_attributes: &str) -> serde
     let client = reqwest::Client::new();
     let response = client.get(url).header("Referer", "https://urbanscheduler.ml").send();
 
-    let result: serde_json::Value = response.unwrap().json().unwrap();
-    println!("{:#}", result);
-    return result["response"]["route"][0].clone();
+    let result: serde_json::Value = response?.json()?;
+    let value_present = &result["response"]["route"][0];
+    Ok(value_present.clone())
 }
 
 fn calculate_distance_here(p1: MyPoint, p2: MyPoint) -> Distance {
-    let route = calculate_route_here(&[p1, p2], SUMMARY);
+    let route = calculate_route_here(&[p1, p2], SUMMARY).unwrap();
     let travel_time = route["summary"]["travelTime"].as_f64().unwrap();
 
     travel_time

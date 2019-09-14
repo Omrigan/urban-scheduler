@@ -1,0 +1,41 @@
+{
+  "config": {
+    "routingBackend": "dummy",
+    "clipping": null,
+    "solver": "rust",
+    "city": "moscow",
+    "final_route": true
+  },
+  "version": 2,
+  "events": [
+    {
+      "type": "fixed_place",
+      "location": {
+        "lat": 55.73855395423671,
+        "lng": 37.61718750000001
+      },
+      "name": "Home"
+    },
+    {
+      "type": "parallel",
+      "items": [
+        {
+          "type": "fixed_place",
+          "location": {
+            "lat": 55.76212704359801,
+            "lng": 37.54577636718751
+          },
+          "name": "Work1"
+        },
+        {
+          "type": "fixed_place",
+          "name": "Work2",
+          "location": {
+            "lat": 55.71341940961942,
+            "lng": 37.747650146484375
+          }
+        }
+      ]
+    }
+  ]
+}

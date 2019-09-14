@@ -12,13 +12,13 @@ export class Result extends Component {
 
     render() {
         return (<div>
-            <Report report={this.props.result.report}/>
+            {this.props.result.report && <Report report={this.props.result.report} config={this.props.result.config}/>}
 
             <ResultItemsList schedule={this.props.result.schedule}/>
 
             <ResultMap schedule={this.props.result.schedule}
                        final_route={this.props.result.final_route}
-                           center={this.props.result.center}/>
+                       center={this.props.result.center}/>
         </div>)
     }
 }

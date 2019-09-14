@@ -1,0 +1,12 @@
+{
+  "ordered_events": [
+    {
+      "type": "park",
+      "brand": "парк горка"
+    },
+    {
+      "name": "фывфыв",
+      "type": "fixed_place"
+    }
+  ]
+}

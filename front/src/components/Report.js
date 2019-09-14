@@ -22,23 +22,27 @@ export default class ListOfMarkers extends Component<> {
             <Message className="blue">
 
                 <Message.Header><h4>Done</h4></Message.Header>
-                Completed at {report.finish_time} <br/> <hr/>
-                {report.stages.map((x, i) =>
-                    (["Stage ",
-                        x[0], " completed in ",
-                        x[1], " milliseconds", <br/>]))}
-                        <hr/>
-                <h5>Config</h5>
-                {Object.entries(report.config).map((x) =>
-                    ([x[0], '=', x[1], <br/>]))}
+                Completed at {report.finish_time} <br/>
                 <hr/>
-                <h5>Number of candidates per stage</h5>
-                {Object.entries(report.numbers_of_candidates).map((x, i) =>
-                    ([i, ": ", x[1], '; ']))}
+                {report.stages.map((x, i) =>
+                    <React.Fragment key={i}>
+                        Stage {x.name} completed in {x.timestamp} milliseconds <br />
+                    </React.Fragment>)}
 
+                <hr/>
 
+                <h5>Config</h5>
+                {Object.entries(this.props.config).map( (x, i) =>
+                    <React.Fragment key={i}>
+                        {x[0]}={x[1]} <br/>
+                    </React.Fragment>)}
+                <hr/>
 
+                {/*<h5>Number of candidates per stage</h5>*/}
+                {/*{Object.entries(report.numbers_of_candidates).map((x, i) =>*/}
+                {/*      <React.Fragment key={i}>*/}
+                {/*          {i}: {x[1]} <br/>*/}
+                {/*    </React.Fragment>)}*/}
             </Message>)
-
     }
 }

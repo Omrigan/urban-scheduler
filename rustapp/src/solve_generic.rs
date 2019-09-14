@@ -1,12 +1,13 @@
 use crate::distances::{DistanceMatrix, AnswersMatrix, squash_distances, calculate_distance};
-use crate::problem::{Problem, Solution};
-
+use crate::problem::{Problem, ScheduleItem};
+use crate::error::{Result, Error};
 use bit_set::BitSet;
 use ndarray_stats::QuantileExt;
 
 use std::collections::BinaryHeap;
 use std::cmp::Ordering;
 use std::cmp::Ordering::Equal;
+use crate::report::Report;
 
 
 #[derive(Debug)]
@@ -27,7 +28,11 @@ impl<'s> SearchTree<'s> {
         if meta.depth == total_events {
             self.best = Some(match self.best {
                 None => node,
-                Some(prev) => (&*node).min(prev)
+                Some(prev) => {
+                    let value = (&*node).min(prev);
+
+                    value
+                }
             });
             return;
         }
@@ -87,12 +92,12 @@ impl<'s> SearchTree<'s> {
                            &self.problem.events[to].points)
     }
 
-    fn recover_answer(&self) -> Option<Solution> {
-        let node = self.best?;
-        let mut result = Solution {
-            schedule: Vec::with_capacity(self.problem.events.len()),
-            full_route: None,
+    fn recover_answer(&self) -> Result<Vec<ScheduleItem>> {
+        let node = match self.best {
+            Some(x) => x,
+            None => return Err(Error::fmt("GenericSolver", "No leaf found"))
         };
+        let mut result = Vec::with_capacity(self.problem.events.len());
 
         let last_dists = node.meta.last_distances.as_ref();
 
@@ -123,16 +128,13 @@ impl<'s> SearchTree<'s> {
 
         reverted_schedule_events.push(current_meta.event_idx);
 
-        dbg!(&reverted_schedule_points);
-
-        dbg!(&reverted_schedule_events);
-
         for (event_idx, point_idx) in reverted_schedule_events.iter().zip(
             reverted_schedule_points.iter()).rev() {
-            result.schedule.push(self.problem.events[*event_idx].points[*point_idx].clone());
+            let event = &self.problem.events[*event_idx];
+            result.push(ScheduleItem::construct(event, event.points[*point_idx].clone()));
         }
 
-        Some(result)
+        Ok(result)
     }
 }
 
@@ -176,7 +178,7 @@ impl PartialEq for Node<'_> {
 
 impl Eq for Node<'_> {}
 
-pub fn solve_generic(problem: &Problem) -> Option<Solution> {
+pub fn solve_generic(problem: &Problem, report: &mut Report) -> Result<Vec<ScheduleItem>> {
     let mut st = SearchTree {
         problem,
         heap: BinaryHeap::new(),
@@ -185,12 +187,12 @@ pub fn solve_generic(problem: &Problem) -> Option<Solution> {
     };
     let mut roots = Vec::new();
 
-    for event in problem.events.iter() {
+    for (idx, event) in problem.events.iter().enumerate() {
         if event.before.is_empty() {
             let mut bs = BitSet::new();
-            bs.insert(event.idx as usize);
+            bs.insert(idx);
             let meta = Meta {
-                event_idx: event.idx as usize,
+                event_idx: idx,
                 last_distances: None,
                 parent: None,
                 last_answers: None,
@@ -214,6 +216,7 @@ pub fn solve_generic(problem: &Problem) -> Option<Solution> {
     while let Some(head) = st.heap.pop() {
         st.expand_node(head);
     }
+    report.checkpoint("tree_built");
     dbg!(&st);
     st.recover_answer()
 }
@@ -222,65 +225,26 @@ pub fn solve_generic(problem: &Problem) -> Option<Solution> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::distances::MyPoint;
-    use crate::problem::{Event, Config};
+    use crate::test_helpers::*;
+
 
     #[test]
     fn test_search() {
-        let sample_event = Event {
-            idx: 0,
-            points: vec![MyPoint {
-                idx: 0,
-                coords: (1f64, 2f64),
-            }],
-            before: vec![1usize].into_iter().collect(),
-        };
+        let mut report = Report::new();
 
-        let sample_event2 = Event {
-            idx: 1,
-            points: vec![MyPoint {
-                idx: 1,
-                coords: (1f64, 2f64),
-            }],
-            before: BitSet::new(),
-        };
-
-        let p = Problem {
-            events: vec![sample_event, sample_event2],
-            config: Config::default(),
-        };
-        let result = solve_generic(&p).unwrap();
+        let p = sample_generic();
+        let result = solve_generic(&p, &mut report).unwrap();
         dbg!(&result);
-        assert_eq!(result.schedule.len(), 2);
-        assert_eq!(result.schedule[0].idx, 1);
-        assert_eq!(result.schedule[1].idx, 0);
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].point.idx, 1);
+        assert_eq!(result[1].point.idx, 0);
     }
 
     #[test]
     fn test_incorrect() {
-        let sample_event = Event {
-            idx: 0,
-            points: vec![MyPoint {
-                idx: 0,
-                coords: (1f64, 2f64),
-            }],
-            before: vec![1usize].into_iter().collect(),
-        };
-
-        let sample_event2 = Event {
-            idx: 1,
-            points: vec![MyPoint {
-                idx: 1,
-                coords: (1f64, 2f64),
-            }],
-            before: vec![0usize].into_iter().collect(),
-        };
-
-        let p = Problem {
-            events: vec![sample_event, sample_event2],
-            config: Config::default(),
-        };
-        let result = solve_generic(&p);
-        assert!(result.is_none());
+        let mut report = Report::new();
+        let p = incorrect_generic();
+        let result = solve_generic(&p, &mut report);
+        assert!(result.is_err());
     }
 }

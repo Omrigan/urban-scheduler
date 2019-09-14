@@ -10,3 +10,5 @@ token.json
 rustapp/target
 .env.private
 venv
+SCIPOptSuite-6.0.2-Linux
+solver/test*

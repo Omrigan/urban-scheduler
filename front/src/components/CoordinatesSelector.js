@@ -35,6 +35,7 @@ export default class CoordinatesSelector extends Component<> {
                  id="mapid">
                 <TileLayer
                     attribution=''
+                    zIndex={-10000}
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 {marker}

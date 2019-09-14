@@ -1,0 +1,22 @@
+config:
+  routingBackend: dummy
+  clipping: 10
+  solver: rust
+  city: moscow
+  final_route: false
+  solve_algorithm: generic
+version: 2
+events:
+  - type: parallel
+    name: parallel
+    items:
+      - type: category
+        name: restaurant
+        category: restaurant
+        brand: null
+      - type: category
+        name: bank
+        category: bank
+      - type: category
+        name: bar
+        category: bar

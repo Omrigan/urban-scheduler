@@ -5,7 +5,7 @@ export class ResultItem extends Component<> {
 
 
     render() {
-        return (<Message>
+        return (<Message style={{backgroundColor: "#" + this.props.color.toString(16)}}>
             <Message.Header>{this.props.title}</Message.Header>
             {this.props.description}
         </Message>)
@@ -17,7 +17,11 @@ export default class ResultItemsList extends Component<> {
 
     render() {
         return this.props.schedule.map((x, i) =>
-                        <ResultItem title={x.name} description={x.description}/>
+                        <ResultItem
+                            key={i}
+                            title={x.name}
+                            description={x.description}
+                            color={x.color}/>
                     )
     }
 }

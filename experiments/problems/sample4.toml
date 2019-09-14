@@ -1,0 +1,14 @@
+[[ordered_events]]
+name="My home"
+type="fixed_place"
+location.lat=55
+location.lng=55
+delay=10
+start_time="10:00"
+
+[[ordered_events]]
+name="My work"
+type="fixed_place"
+location.lat=55
+location.lng=56
+delay=10

@@ -70,9 +70,10 @@ class TC(TestCase):
         self.assertListEqual(prediction_python, prediction_rust)
 
     def test_rust_same(self):
-        f = open('helpers/sample_requests/ordered_benchmark.yaml')
+        f = open('ordered_benchmark.yaml')
         content = load(f)
         resp = post(URL + '/predict', json=content).json()
+        print(resp)
         self.assertEqual(resp['schedule'], [{
             'additional_fields': {}, 'brand': 'музейный парк',
             'categories': ['park', 'point_of_interest', 'establishment'],

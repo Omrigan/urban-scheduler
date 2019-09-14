@@ -6,6 +6,18 @@ FROM clux/muslrust as build
 #
 #RUN rustup target add x86_64-unknown-linux-musl
 
+RUN apt-get update  && \
+    apt-get install -y liblapack-dev gcc software-properties-common
+
+RUN add-apt-repository ppa:jonathonf/gcc-7.3 # Thanks ubuntu 16.04
+RUN apt-get update && apt-get install -y libgfortran4
+
+
+COPY src/opt/scip /usr/local/bin/scip
+
+COPY src/opt/zimpl /usr/local/bin/zimpl
+
+
 WORKDIR /usr/src/usrust
 
 ARG HERE_APP_CODE
@@ -30,15 +42,21 @@ COPY src src
 
 RUN cargo test --release --target=x86_64-unknown-linux-musl
 
-
 RUN cargo build --release --target=x86_64-unknown-linux-musl
+
+
+RUN cp /usr/src/usrust/target/x86_64-unknown-linux-musl/release/usrust /usr/local/bin/usrust
 
 # ------------------------------------------------------------------------------
 # Final Stage
 # ------------------------------------------------------------------------------
 
-FROM alpine:latest
+FROM debian:latest
 
-COPY --from=build /usr/src/usrust/target/x86_64-unknown-linux-musl/release/usrust /usr/local/bin/usrust
+COPY --from=build /usr/local/bin /usr/local/bin
+
+RUN apt-get update  && \
+    apt-get install -y liblapack-dev gcc libgfortran4
+
 
 CMD ["usrust"]
