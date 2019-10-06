@@ -1,0 +1,23 @@
+config:
+  routingBackend: dummy
+  clipping: 20
+  solver: rust
+  city: moscow
+  final_route: false
+  solve_algorithm: generic
+version: 2
+events:
+  - type: fixed_place
+    name: University
+    location:
+      lat: 55.70242280379701
+      lng: 37.52955436706544
+  - type: category
+    category: cafe
+  - type: category
+    category: park
+  - type: fixed_place
+    name: Home
+    location:
+      lat: 55.76419384832066
+      lng: 37.66508102416993

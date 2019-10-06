@@ -1,0 +1,77 @@
+{
+  "config": {
+    "dists_method": "dummy",
+    "clipping": 10,
+    "solver": "rust",
+    "solve_algorithm": "generic",
+    "city": "moscow",
+    "final_route": true
+  },
+  "version": 2,
+  "events": [
+    {
+      "type": "fixed_place",
+      "location": {
+        "lat": 55.77701712561079,
+        "lng": 37.65804290771485
+      },
+      "name": "Вокзал"
+    },
+    {
+      "type": "parallel",
+      "items": [
+        {
+          "type": "sequential",
+          "items": [
+            {
+              "type": "fixed_place",
+              "name": "Завести сумку",
+              "location": {
+                "lat": 55.722141003142525,
+                "lng": 37.61581420898438
+              }
+            },
+            {
+              "type": "fixed_place",
+              "location": {
+                "lat": 55.871959406845356,
+                "lng": 37.473678588867195
+              },
+              "name": "HERE"
+            },
+            {
+              "type": "fixed_place",
+              "name": "Яндекс",
+              "location": {
+                "lat": 55.73480897516206,
+                "lng": 37.58620262145997
+              }
+            }
+          ]
+        },
+        {
+          "type": "category",
+          "category": "bank",
+          "brand": "альфа банк"
+        },
+        {
+          "type": "category",
+          "category": "fastfood",
+          "brand": "теремок"
+        }
+      ]
+    },
+    {
+      "type": "category",
+      "category": "cafe"
+    },
+    {
+      "type": "fixed_place",
+      "name": "Hotel",
+      "location": {
+        "lat": 55.74530852880496,
+        "lng": 37.56311416625977
+      }
+    }
+  ]
+}
