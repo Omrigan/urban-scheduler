@@ -3,7 +3,7 @@
 
 
 ## Usage scenario
-When someone wants to use the app, he creates a schedule for the day. The schedule may contain placeholders, specifying only category of the place desired to visit. 
+When someone wants to use the app, they creates a schedule for the day. The schedule may contain placeholders, specifying only category of the place desired to visit. 
 
 Urban Scheduler is able to substitute event placeholder with actual place, optimizing total travel time.
 
